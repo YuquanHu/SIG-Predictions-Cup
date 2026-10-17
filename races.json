@@ -1,0 +1,14 @@
+{
+  "RI-SEN": {
+    "name": "Rhode Island Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {"kalshi_id": "SENATERI-26-D", "poly_id": "630911"},
+      "R": {"kalshi_id": "SENATERI-26-R", "poly_id": "630912"}
+    },
+    "contracts": [
+      {"market_id": "387", "pays_if": "D"},
+      {"market_id": "388", "pays_if": "R"}
+    ]
+  }
+}
