@@ -6,6 +6,8 @@ import requests
 import config
 from races import clear_quote, iter_outcomes, quote_available, warn
 
+NAME = "Kalshi"
+
 
 def _price(value):
     """Dollar string to float; empty or 0 means 'no quote' (None), never a real price of zero."""
@@ -15,6 +17,10 @@ def _price(value):
 
 def _size(value):
     return float(value) if value not in (None, "") else None
+
+
+def setup(races):
+    """Kalshi needs no id lookup."""
 
 
 def fetch_prices(races):
@@ -33,14 +39,14 @@ def fetch_prices(races):
         markets = {m["ticker"]: m for m in resp.json()["markets"]}
     except Exception as e:
         for race_id, code, o in outcomes.values():
-            warn(race_id, "Kalshi", f"{code} ({o['kalshi_id']}): request failed: {e}")
+            warn(race_id, NAME, f"{code} ({o['kalshi_id']}): request failed: {e}")
         return
 
     now = time.time()
     for ticker, (race_id, code, o) in outcomes.items():
         m = markets.get(ticker)
         if m is None:
-            warn(race_id, "Kalshi", f"{code} ({ticker}): ticker not returned")
+            warn(race_id, NAME, f"{code} ({ticker}): ticker not returned")
             continue
         o["kalshi"].update(
             bid=_price(m.get("yes_bid_dollars")),
@@ -50,4 +56,4 @@ def fetch_prices(races):
             updated=now,
         )
         if not quote_available(o["kalshi"]):
-            warn(race_id, "Kalshi", f"{code} ({ticker}): no two-sided quote")
+            warn(race_id, NAME, f"{code} ({ticker}): no two-sided quote")

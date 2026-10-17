@@ -1,16 +1,50 @@
 """Stage 3 strategy: fair value, edge, Kelly, and picking the top trades. Pure logic, no network."""
+from dataclasses import dataclass
+
 import config
-from races import iter_contracts, quote_available
+from races import quote_available
 
 EPS = 1e-9  # tolerance for float comparisons against the cent-based limits
+
+
+@dataclass(frozen=True)
+class Fair:
+    value: float | None  # None: no fair value, and `note` says why
+    note: str
+
+
+@dataclass
+class Opportunity:
+    """One way to buy a SIG contract: Yes at the ask or No at 1 - bid."""
+    race: str
+    market_id: str
+    pays_if: str
+    side: str          # "yes" or "no"
+    price: float       # cost per share
+    fair: float        # fair probability that this side wins
+    size: float | None  # shares available at `price`
+    wins_when: str     # outcome whose win makes this bet pay; equivalent bets share it
+    decision: str | None = None
+
+    @property
+    def edge(self):
+        return self.fair - self.price
+
+    @property
+    def kelly(self):
+        """Binary Kelly for a bet costing `price` with win probability `fair`: (q - c) / (1 - c)."""
+        return max(self.edge, 0) / (1 - self.price)
+
+    @property
+    def half_kelly(self):
+        return self.kelly / 2
 
 
 def fair_value(outcome, now):
     """Blend the healthy Kalshi and Polymarket midpoints 50/50.
 
     A source is dropped when it has no two-sided quote, is stale, or has a spread over MAX_SPREAD.
-    Returns (value, note). value is None when no source is usable or the two disagree by more than
-    MAX_DISAGREE; the note says why.
+    The value is None when no source is usable or the two disagree by more than MAX_DISAGREE.
     """
     mids, dropped = {}, []
     for name, key in (("Kalshi", "kalshi"), ("Poly", "poly")):
@@ -27,90 +61,76 @@ def fair_value(outcome, now):
     used = ", ".join(f"{n} {m:.3f}" for n, m in mids.items())
     drop_note = f" (dropped: {'; '.join(dropped)})" if dropped else ""
     if not mids:
-        return None, f"no usable source: {'; '.join(dropped)}"
+        return Fair(None, f"no usable source: {'; '.join(dropped)}")
     if len(mids) == 2 and abs(mids["Kalshi"] - mids["Poly"]) > config.MAX_DISAGREE + EPS:
-        return None, f"sources disagree by {abs(mids['Kalshi'] - mids['Poly']):.3f}: {used}"
-    return sum(mids.values()) / len(mids), f"{used}{drop_note}"
+        return Fair(None, f"sources disagree by {abs(mids['Kalshi'] - mids['Poly']):.3f}: {used}")
+    return Fair(sum(mids.values()) / len(mids), f"{used}{drop_note}")
 
 
-def _bet_key(race, contract, side):
-    """Bets that win in the same world share a key: Dem Yes and Rep No are one bet in a two-way race."""
-    outcomes = list(race["outcomes"])
-    wins = side == "yes"
-    if not wins and len(outcomes) == 2:
-        pays_if = next(o for o in outcomes if o != contract["pays_if"])
+def compute_fair_values(races, now):
+    """{(race_id, outcome code): Fair} for every outcome."""
+    return {(race_id, code): fair_value(o, now)
+            for race_id, race in races.items() for code, o in race["outcomes"].items()}
+
+
+def _wins_when(race, pays_if, side):
+    """Dem Yes and Rep No win in the same world, so in a two-way race they share this value."""
+    if side == "yes":
         return pays_if
-    return contract["pays_if"] if wins else f"not {contract['pays_if']}"
+    others = [code for code in race["outcomes"] if code != pays_if]
+    return others[0] if len(others) == 1 else f"not {pays_if}"
 
 
-def find_opportunities(races, now):
-    """Every (SIG contract, Yes/No) candidate with its fair value, edge and Kelly.
-
-    `edge` = fair win probability minus the price paid. Kelly for a binary contract bought at
-    price c with win probability q is (q - c) / (1 - c); a Yes costs the ask, a No costs 1 - bid.
-    Each candidate gets a "decision" later; contracts with no fair value are returned as skips.
-    """
-    candidates, skipped = [], []
+def find_opportunities(races, fair_values):
+    """Every Yes/No candidate on every SIG contract whose outcome has a fair value."""
+    found = []
     for race_id, race in races.items():
-        fair = {code: fair_value(o, now) for code, o in race["outcomes"].items()}
         for contract in race["contracts"]:
-            value, note = fair[contract["pays_if"]]
-            if value is None:
-                skipped.append((race_id, contract["market_id"], f"no fair value for {contract['pays_if']}: {note}"))
+            fair = fair_values[(race_id, contract["pays_if"])].value
+            if fair is None:
                 continue
             yes = contract["yes"]
-            sides = {  # side -> (win probability, price paid, shares available at that price)
-                "yes": (value, yes["ask"], yes["ask_size"]),
-                "no": (1 - value, None if yes["bid"] is None else 1 - yes["bid"], yes["bid_size"]),
-            }
-            for side, (win_prob, price, size) in sides.items():
-                if price is None or not 0 < price < 1:
-                    continue  # nothing to buy on this side
-                edge = win_prob - price
-                kelly = max(edge, 0) / (1 - price)
-                candidates.append({
-                    "race": race_id, "market_id": contract["market_id"], "pays_if": contract["pays_if"],
-                    "side": side, "price": price, "fair": win_prob, "edge": edge,
-                    "kelly": kelly, "half_kelly": kelly / 2, "size": size,
-                    "bet": _bet_key(race, contract, side), "fair_note": note, "decision": None,
-                })
-    return candidates, skipped
+            no_price = None if yes["bid"] is None else 1 - yes["bid"]
+            for side, win_prob, price, size in (("yes", fair, yes["ask"], yes["ask_size"]),
+                                                ("no", 1 - fair, no_price, yes["bid_size"])):
+                if price is not None and 0 < price < 1:
+                    found.append(Opportunity(race_id, contract["market_id"], contract["pays_if"], side,
+                                             price, win_prob, size,
+                                             _wins_when(race, contract["pays_if"], side)))
+    return found
+
+
+def _keep_best(candidates, group, score, reason):
+    """Keep the highest-scoring candidate in each group; the rest get `reason(winner)` as their decision."""
+    winners = {}
+    for c in candidates:
+        if group(c) not in winners or score(c) > score(winners[group(c)]):
+            winners[group(c)] = c
+    for c in candidates:
+        if c is not winners[group(c)]:
+            c.decision = reason(winners[group(c)])
+    return [c for c in candidates if c.decision is None]
 
 
 def keep_top(candidates, n=config.TOP_N):
-    """Pick the trades and record why every candidate was or wasn't picked in c["decision"].
+    """Pick the trades and record why every candidate was or wasn't picked in `decision`.
 
-    1. edge must be at least MIN_EDGE;  2. equivalent bets keep only the cheaper one;
+    1. edge at least MIN_EDGE;  2. equivalent bets keep only the cheaper one;
     3. one bet per race, the highest Kelly;  4. the best n by Kelly overall.
     """
     eligible = []
     for c in candidates:
-        if c["edge"] < config.MIN_EDGE - EPS:
-            c["decision"] = f"edge {c['edge'] * 100:.1f}c is below {config.MIN_EDGE * 100:.0f}c"
+        if c.edge < config.MIN_EDGE - EPS:
+            c.decision = f"edge {c.edge * 100:.1f}c is below {config.MIN_EDGE * 100:.0f}c"
         else:
             eligible.append(c)
 
-    cheapest = {}
-    for c in eligible:
-        key = (c["race"], c["bet"])
-        if key not in cheapest or c["price"] < cheapest[key]["price"]:
-            cheapest[key] = c
-    for c in eligible:
-        best = cheapest[(c["race"], c["bet"])]
-        if c is not best:
-            c["decision"] = f"same bet as {best['side'].upper()} {best['market_id']}, which is cheaper"
-    eligible = [c for c in eligible if c["decision"] is None]
+    eligible = _keep_best(eligible, lambda c: (c.race, c.wins_when), lambda c: -c.price,
+                          lambda w: f"same bet as {w.side.upper()} {w.market_id}, which is cheaper")
+    eligible = _keep_best(eligible, lambda c: c.race, lambda c: c.kelly,
+                          lambda w: f"{w.race} already has a better bet ({w.side.upper()} {w.market_id})")
 
-    best_in_race = {}
-    for c in eligible:
-        if c["race"] not in best_in_race or c["kelly"] > best_in_race[c["race"]]["kelly"]:
-            best_in_race[c["race"]] = c
-    for c in eligible:
-        best = best_in_race[c["race"]]
-        if c is not best:
-            c["decision"] = f"{c['race']} already has a better bet ({best['side'].upper()} {best['market_id']})"
-    eligible = sorted(best_in_race.values(), key=lambda c: c["kelly"], reverse=True)
-
+    eligible.sort(key=lambda c: c.kelly, reverse=True)
     for rank, c in enumerate(eligible, start=1):
-        c["decision"] = "TRADE" if rank <= n else f"outside the top {n} by Kelly"
-    return [c for c in eligible if c["decision"] == "TRADE"]
+        c.decision = "TRADE" if rank <= n else f"outside the top {n} by Kelly"
+    return eligible[:n]

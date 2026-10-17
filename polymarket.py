@@ -7,6 +7,8 @@ import requests
 import config
 from races import clear_quote, iter_outcomes, quote_available, warn
 
+NAME = "Polymarket"
+
 
 def setup(races):
     """Resolve each Gamma market id to its Yes CLOB token id (one request)."""
@@ -23,22 +25,22 @@ def setup(races):
         markets = resp.json()
     except Exception as e:
         for race_id, code, o in outcomes.values():
-            warn(race_id, "Polymarket", f"{code} ({o['poly_id']}): market lookup failed: {e}")
+            warn(race_id, NAME, f"{code} ({o['poly_id']}): market lookup failed: {e}")
         return
 
     for m in markets:
         entry = outcomes.get(str(m["id"]))
         if entry is None:
             continue
+        race_id, code, o = entry
         try:
             labels = json.loads(m["outcomes"])
-            o = entry[2]
             o["poly_yes_token"] = json.loads(m["clobTokenIds"])[labels.index("Yes")]
         except (KeyError, ValueError, IndexError) as e:
-            warn(entry[0], "Polymarket", f"{entry[1]} ({m['id']}): no Yes token in market data: {e}")
+            warn(race_id, NAME, f"{code} ({m['id']}): no Yes token in market data: {e}")
     for race_id, code, o in outcomes.values():
         if o["poly_yes_token"] is None:
-            warn(race_id, "Polymarket", f"{code} ({o['poly_id']}): market not found")
+            warn(race_id, NAME, f"{code} ({o['poly_id']}): market not found")
 
 
 def _post_books(tokens):
@@ -80,7 +82,7 @@ def fetch_prices(races):
     books, errors = _fetch_books(list(outcomes))
     for token, e in errors.items():
         race_id, code, o = outcomes[token]
-        warn(race_id, "Polymarket", f"{code} ({o['poly_id']}): book request failed: {e}")
+        warn(race_id, NAME, f"{code} ({o['poly_id']}): book request failed: {e}")
 
     now = time.time()
     seen = set()
@@ -101,7 +103,7 @@ def fetch_prices(races):
             updated=now,
         )
         if not quote_available(o["poly"]):
-            warn(race_id, "Polymarket", f"{code} ({o['poly_id']}): no two-sided quote")
+            warn(race_id, NAME, f"{code} ({o['poly_id']}): no two-sided quote")
     for token, (race_id, code, o) in outcomes.items():
         if token not in seen and token not in errors:
-            warn(race_id, "Polymarket", f"{code} ({o['poly_id']}): no book returned")
+            warn(race_id, NAME, f"{code} ({o['poly_id']}): no book returned")

@@ -5,7 +5,7 @@ Prints your account balance, your open positions, and the Yes bid/ask for market
 """
 import sig
 from config import RACES_FILE, SIG_TOURNAMENT_ID
-from fetch_prices import print_quote
+from display import print_quote
 from races import iter_contracts, load_races
 
 TEST_MARKETS = {"387", "388"}
@@ -15,10 +15,9 @@ def section(title, fn):
     """Run one read; report a failure instead of crashing so the other reads still run."""
     print(f"\n-- {title}")
     try:
-        return fn()
+        fn()
     except Exception as e:
         print(f"  FAILED: {e}")
-        return None
 
 
 def show_account():

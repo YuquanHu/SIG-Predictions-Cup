@@ -6,17 +6,17 @@
 import time
 
 import config
-from fetch_prices import run_each
+from feeds import fetch_all, setup_all
 from races import load_races
-from strategy import find_opportunities, keep_top
+from strategy import compute_fair_values, find_opportunities, keep_top
 
 COLUMNS = ("race", "mkt", "side", "price", "fair", "edge", "kelly", "half", "avail", "decision")
 
 
 def row(c):
-    return (c["race"], c["market_id"], c["side"].upper(), f"{c['price']:.3f}", f"{c['fair']:.3f}",
-            f"{c['edge'] * 100:+.1f}c", f"{c['kelly'] * 100:.1f}%", f"{c['half_kelly'] * 100:.1f}%",
-            f"{c['size']:,.0f}" if c["size"] is not None else "-", c["decision"])
+    return (c.race, c.market_id, c.side.upper(), f"{c.price:.3f}", f"{c.fair:.3f}",
+            f"{c.edge * 100:+.1f}c", f"{c.kelly * 100:.1f}%", f"{c.half_kelly * 100:.1f}%",
+            f"{c.size:,.0f}" if c.size is not None else "-", c.decision)
 
 
 def print_table(rows):
@@ -28,26 +28,25 @@ def print_table(rows):
 def main():
     races = load_races(config.RACES_FILE)
     print(f"Loaded {len(races)} race(s). DRY_RUN={config.DRY_RUN}, no orders are placed.")
-    run_each(races, "setup")
-    run_each(races, "fetch")
-    now = time.time()
+    setup_all(races)
+    fetch_all(races)
 
-    candidates, skipped = find_opportunities(races, now)
+    fair_values = compute_fair_values(races, time.time())
+    candidates = find_opportunities(races, fair_values)
     chosen = keep_top(candidates)
 
     print("\nFair values")
-    for c in dict.fromkeys((c["race"], c["pays_if"], c["fair_note"]) for c in candidates):
-        print(f"  {c[0]} {c[1]}: {c[2]}")
-    for race_id, market_id, why in skipped:
-        print(f"  {race_id} market {market_id}: skipped, {why}")
+    for (race_id, code), fair in fair_values.items():
+        value = f"{fair.value:.3f}" if fair.value is not None else "none, its contracts are skipped"
+        print(f"  {race_id} {code}: {value}  ({fair.note})")
 
     print("\nWould trade" if chosen else "\nNothing to trade")
     print_table([row(c) for c in chosen])
 
-    rest = [c for c in candidates if c["decision"] != "TRADE"]
+    rest = [c for c in candidates if c.decision != "TRADE"]
     if rest:
         print("\nConsidered but not traded")
-        print_table([row(c) for c in sorted(rest, key=lambda c: c["edge"], reverse=True)])
+        print_table([row(c) for c in sorted(rest, key=lambda c: c.edge, reverse=True)])
 
 
 if __name__ == "__main__":

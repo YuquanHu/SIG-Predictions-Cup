@@ -6,6 +6,8 @@ import requests
 import config
 from races import clear_quote, iter_contracts, warn
 
+NAME = "SIG"
+
 
 class SigError(Exception):
     pass
@@ -44,7 +46,7 @@ def setup(races):
         try:
             _resolve(c)
         except Exception as e:  # a bad market must not stop the other races
-            warn(race_id, "SIG", f"market {c['market_id']} lookup failed: {e}")
+            warn(race_id, NAME, f"market {c['market_id']} lookup failed: {e}")
 
 
 def fetch_prices(races):
@@ -61,7 +63,7 @@ def fetch_prices(races):
             best_bid = max(ex["bids"], key=lambda lvl: lvl["price"], default=None)
             best_ask = min(ex["asks"], key=lambda lvl: lvl["price"], default=None)
         except Exception as e:
-            warn(race_id, "SIG", f"market {c['market_id']}: {e}")
+            warn(race_id, NAME, f"market {c['market_id']}: {e}")
             continue
         c["yes"].update(
             bid=best_bid["price"] if best_bid else None,
@@ -71,7 +73,7 @@ def fetch_prices(races):
             updated=time.time(),
         )
         if best_bid is None and best_ask is None:
-            warn(race_id, "SIG", f"market {c['market_id']} has an empty orderbook")
+            warn(race_id, NAME, f"market {c['market_id']} has an empty orderbook")
 
 
 def fetch_account():
