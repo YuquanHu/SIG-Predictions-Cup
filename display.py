@@ -24,3 +24,43 @@ def print_quote(label, q):
     print(f"    {label:<20} bid {fmt(q['bid'])} x{fmt_size(q['bid_size'])}   "
           f"ask {fmt(q['ask'])} x{fmt_size(q['ask_size'])}   "
           f"mid {fmt(mid)}  spread {fmt(spread)}  age {age(q)}")
+
+
+def print_table(columns, rows):
+    widths = [max(len(str(r[i])) for r in (columns, *rows)) for i in range(len(columns))]
+    for r in (columns, *rows):
+        print("  " + "  ".join(str(v).ljust(w) for v, w in zip(r, widths)).rstrip())
+
+
+OPPORTUNITY_COLUMNS = ("race", "mkt", "side", "price", "fair", "edge", "kelly", "half", "avail", "decision")
+
+
+def opportunity_cells(c):
+    return (c.race, c.market_id, c.side.upper(), f"{c.price:.3f}", f"{c.fair:.3f}",
+            f"{c.edge * 100:+.1f}c", f"{c.kelly * 100:.1f}%", f"{c.half_kelly * 100:.1f}%",
+            f"{c.size:,.0f}" if c.size is not None else "-", c.decision)
+
+
+HOLDING_COLUMNS = ("race", "mkt", "side", "shares", "value", "sell", "fair", "exp return", "action")
+
+
+def holding_cells(h, action):
+    return (h.race or "(not in races.json)", h.market_id, h.side.upper(), f"{h.shares:,.0f}", f"{h.value:,.0f}",
+            fmt(h.sell_price).strip(), fmt(h.fair).strip(),
+            f"{h.exp_return:+.1%}" if h.exp_return is not None else "-", action)
+
+
+def print_report(cash, invested, bankroll, investable, chosen, holdings, sells, notes):
+    """Everything one loop decided, in reading order."""
+    print(f"\ncash {cash:,.0f} | invested {invested:,.0f} ({invested / bankroll:.1%}) | "
+          f"bankroll {bankroll:,.0f} | investable cash {investable:,.0f}")
+    print("\nTop opportunities")
+    print_table(OPPORTUNITY_COLUMNS, [opportunity_cells(c) for c in chosen])
+    if holdings:
+        print("\nHoldings")
+        actions = {(o.market_id, o.side): o.reason for o in sells}
+        print_table(HOLDING_COLUMNS, [holding_cells(h, actions.get((h.market_id, h.side), "hold"))
+                                      for h in holdings])
+    print("\nSizing")
+    for note in notes or ["nothing to size"]:
+        print(f"  {note}")

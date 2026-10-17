@@ -6,24 +6,10 @@
 import time
 
 import config
+from display import OPPORTUNITY_COLUMNS, opportunity_cells, print_table
 from feeds import fetch_all, setup_all
 from races import load_races
 from strategy import compute_fair_values, find_opportunities, keep_top
-
-COLUMNS = ("race", "mkt", "side", "price", "fair", "edge", "kelly", "half", "avail", "decision")
-
-
-def row(c):
-    return (c.race, c.market_id, c.side.upper(), f"{c.price:.3f}", f"{c.fair:.3f}",
-            f"{c.edge * 100:+.1f}c", f"{c.kelly * 100:.1f}%", f"{c.half_kelly * 100:.1f}%",
-            f"{c.size:,.0f}" if c.size is not None else "-", c.decision)
-
-
-def print_table(rows):
-    widths = [max(len(str(r[i])) for r in (COLUMNS, *rows)) for i in range(len(COLUMNS))]
-    for r in (COLUMNS, *rows):
-        print("  " + "  ".join(str(v).ljust(w) for v, w in zip(r, widths)).rstrip())
-
 
 def main():
     races = load_races(config.RACES_FILE)
@@ -41,12 +27,12 @@ def main():
         print(f"  {race_id} {code}: {value}  ({fair.note})")
 
     print("\nWould trade" if chosen else "\nNothing to trade")
-    print_table([row(c) for c in chosen])
+    print_table(OPPORTUNITY_COLUMNS, [opportunity_cells(c) for c in chosen])
 
     rest = [c for c in candidates if c.decision != "TRADE"]
     if rest:
         print("\nConsidered but not traded")
-        print_table([row(c) for c in sorted(rest, key=lambda c: c.edge, reverse=True)])
+        print_table(OPPORTUNITY_COLUMNS, [opportunity_cells(c) for c in sorted(rest, key=lambda c: c.edge, reverse=True)])
 
 
 if __name__ == "__main__":

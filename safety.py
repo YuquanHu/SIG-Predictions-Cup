@@ -1,0 +1,33 @@
+"""Kill switch: STOP file, daily loss, and consecutive errors."""
+import os
+from dataclasses import dataclass
+from datetime import date
+
+import config
+
+
+@dataclass
+class RunState:
+    errors_in_row: int = 0
+    day: date | None = None
+    day_start_equity: float | None = None
+
+
+def stop_file_exists():
+    return os.path.exists(config.STOP_FILE)
+
+
+def check_kill_switch(state, equity=None):
+    """Reason to stop trading, or None. Pass `equity` (cash + positions) to include the daily loss test."""
+    if stop_file_exists():
+        return f"STOP file found at {config.STOP_FILE}"
+    if state.errors_in_row >= config.MAX_CONSECUTIVE_ERRORS:
+        return f"{state.errors_in_row} errors in a row"
+    if equity is None:
+        return None
+    today = date.today()
+    if state.day != today:  # first reading of the day is the baseline
+        state.day, state.day_start_equity = today, equity
+    elif equity < state.day_start_equity * (1 - config.MAX_DAILY_LOSS):
+        return f"down {1 - equity / state.day_start_equity:.1%} today ({state.day_start_equity:,.0f} -> {equity:,.0f})"
+    return None

@@ -21,8 +21,19 @@ def quote_available(q):
     return q["bid"] is not None and q["ask"] is not None
 
 
+_warnings = []
+
+
 def warn(race_id, source, detail):
-    print(f"  WARNING [{race_id}] {source} unavailable: {detail}")
+    """Print a per-race, per-source warning and keep it for drain_warnings()."""
+    message = f"  WARNING [{race_id}] {source} unavailable: {detail}"
+    print(message)
+    _warnings.append(message)
+
+
+def drain_warnings():
+    drained, _warnings[:] = list(_warnings), []
+    return drained
 
 
 def load_races(path):

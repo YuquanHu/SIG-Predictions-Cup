@@ -36,6 +36,10 @@ class Opportunity:
         return max(self.edge, 0) / (1 - self.price)
 
     @property
+    def expected_return(self):
+        return self.edge / self.price
+
+    @property
     def half_kelly(self):
         return self.kelly / 2
 
@@ -73,7 +77,7 @@ def compute_fair_values(races, now):
             for race_id, race in races.items() for code, o in race["outcomes"].items()}
 
 
-def _wins_when(race, pays_if, side):
+def wins_when(race, pays_if, side):
     """Dem Yes and Rep No win in the same world, so in a two-way race they share this value."""
     if side == "yes":
         return pays_if
@@ -96,7 +100,7 @@ def find_opportunities(races, fair_values):
                 if price is not None and 0 < price < 1:
                     found.append(Opportunity(race_id, contract["market_id"], contract["pays_if"], side,
                                              price, win_prob, size,
-                                             _wins_when(race, contract["pays_if"], side)))
+                                             wins_when(race, contract["pays_if"], side)))
     return found
 
 
