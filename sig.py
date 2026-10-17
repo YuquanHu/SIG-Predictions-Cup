@@ -72,3 +72,32 @@ def fetch_prices(races):
         )
         if best_bid is None and best_ask is None:
             warn(race_id, "SIG", f"market {c['market_id']} has an empty orderbook")
+
+
+def fetch_account():
+    """Cash balance and buying power (read-only)."""
+    a = _get("/account")
+    return {"balance": a["balance"], "buying_power": a["buyingPower"], "username": a.get("username")}
+
+
+def fetch_positions():
+    """Open positions: market, side, shares, average price. Quantity > 0 is YES shares, < 0 is NO."""
+    slug = config.SIG_TOURNAMENT_SLUG
+    path = f"/tournaments/{slug}/portfolio/positions" if slug else "/portfolio/positions"
+    positions = []
+    for p in _get(path)["positions"]:
+        if p["settled"] or p["quantity"] == 0:
+            continue
+        positions.append({
+            "market_id": p["marketId"],
+            "exchange_id": p["exchangeId"],
+            "title": p["marketTitle"],
+            "side": "yes" if p["quantity"] > 0 else "no",
+            "shares": abs(p["quantity"]),
+            "avg_price": p["avgCost"],
+            # currentPrice is the YES price; report the price of the side actually held
+            "current_price": None if p["currentPrice"] is None
+            else (p["currentPrice"] if p["quantity"] > 0 else 1 - p["currentPrice"]),
+            "unrealized_pnl": p["unrealizedPnl"],
+        })
+    return positions
