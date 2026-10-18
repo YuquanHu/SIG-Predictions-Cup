@@ -79,6 +79,8 @@ def fetch_prices(races):
 def fetch_account():
     """Cash balance and buying power (read-only)."""
     a = _get("/account")
+    if a["balance"] is None:
+        raise SigError("GET /account returned no cash balance")
     return {"balance": a["balance"], "buying_power": a["buyingPower"], "username": a.get("username")}
 
 

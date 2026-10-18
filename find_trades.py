@@ -19,7 +19,7 @@ def main():
 
     fair_values = compute_fair_values(races, time.time())
     candidates = find_opportunities(races, fair_values)
-    chosen = keep_top(candidates)
+    chosen = keep_top(candidates, config.TOP_N)
 
     print("\nFair values")
     for (race_id, code), fair in fair_values.items():

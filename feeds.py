@@ -6,18 +6,18 @@ import sig
 SOURCES = (sig, kalshi, polymarket)  # each exposes NAME, setup(races) and fetch_prices(races)
 
 
-def _run(races, stage):
+def _run_each(races, label, pick):
     """The sources already warn per race; this is the backstop so one crashing source can't stop the others."""
     for source in SOURCES:
         try:
-            getattr(source, stage)(races)
+            pick(source)(races)
         except Exception as e:
-            print(f"  WARNING {source.NAME} {stage} crashed for all races: {type(e).__name__}: {e}")
+            print(f"  WARNING {source.NAME} {label} crashed for all races: {type(e).__name__}: {e}")
 
 
 def setup_all(races):
-    _run(races, "setup")
+    _run_each(races, "setup", lambda source: source.setup)
 
 
 def fetch_all(races):
-    _run(races, "fetch_prices")
+    _run_each(races, "fetch", lambda source: source.fetch_prices)

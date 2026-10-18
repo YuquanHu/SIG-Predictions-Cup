@@ -17,53 +17,61 @@ import orders
 import sig
 from display import print_report
 from feeds import fetch_all, setup_all
-from portfolio import build_holdings
+from portfolio import build_portfolio
 from races import drain_warnings, load_races
-from safety import RunState, check_kill_switch, stop_file_exists
+from safety import RunState, check_loss, check_stop, stop_file_exists
 from strategy import compute_fair_values, find_opportunities, keep_top
 from trading import compute_wants, decide_sells, size_buys
 
 
 def run_loop(loop_no, races, state, regime):
-    """One pass. Returns the kill-switch reason if trading must stop, else None."""
+    """One pass. Returns the reason trading must stop, else None."""
     orders.cancel_all()
-    reason = check_kill_switch(state)
+    reason = check_stop(state)
     if reason:
         return reason
 
     fetch_all(races)
-    account = sig.fetch_account()
-    if account["balance"] is None:
-        raise RuntimeError("SIG returned no cash balance")
-    cash = account["balance"]
     fair_values = compute_fair_values(races, time.time())
-    holdings = build_holdings(sig.fetch_positions(), races, fair_values)
-    invested = sum(h.value for h in holdings)
-    bankroll = cash + invested
-    reason = check_kill_switch(state, bankroll)
+    portfolio = build_portfolio(sig.fetch_account()["balance"], sig.fetch_positions(), races, fair_values)
+    reason = check_loss(state, portfolio.bankroll)
     if reason:
         return reason
 
     candidates = find_opportunities(races, fair_values)
     chosen = keep_top(candidates, config.TOP_N)
-    wants = compute_wants(chosen, holdings, bankroll)
-    investable = max(0.0, min(config.INVEST_CAP * bankroll - invested, cash))
-    sells = decide_sells(holdings, wants, investable)
-    buys, notes = size_buys(wants, investable)
+    wants = compute_wants(chosen, portfolio)
+    buys, notes = size_buys(wants, portfolio.investable)
+    to_place = decide_sells(portfolio, wants) + buys
 
-    print_report(cash, invested, bankroll, investable, chosen, holdings, sells, notes)
+    print_report(portfolio, chosen, [o for o in to_place if o.action == "sell"], notes)
     print("\nOrders")
-    for order in sells + buys:
+    for order in to_place:
         orders.place_order(order, regime.order_timeout)
-    if not sells + buys:
+    if not to_place:
         print("  none")
 
     logbook.log("opportunities", loop_no, [logbook.opportunity_row(c) for c in candidates])
-    logbook.log("orders", loop_no, [logbook.order_row(o) for o in sells + buys])
-    logbook.log("loops", loop_no, [{"regime": config.REGIME, "cash": cash, "invested": invested,
-                                    "bankroll": bankroll, "opportunities": len(chosen),
-                                    "orders": len(sells + buys), "status": "ok"}])
+    logbook.log("orders", loop_no, [logbook.order_row(o) for o in to_place])
+    logbook.log("loops", loop_no, [{"regime": config.REGIME, "cash": portfolio.cash, "invested": portfolio.invested,
+                                    "bankroll": portfolio.bankroll, "opportunities": len(chosen),
+                                    "orders": len(to_place), "status": "ok"}])
     return None
+
+
+def guarded_loop(loop_no, races, state, regime):
+    """run_loop with its failures counted and logged, so one bad loop does not end the run."""
+    try:
+        stop_reason = run_loop(loop_no, races, state, regime)
+        state.errors_in_row = 0
+    except Exception as e:
+        stop_reason = None
+        state.errors_in_row += 1
+        print(f"  ERROR ({state.errors_in_row} in a row): {type(e).__name__}: {e}")
+        logbook.log("errors", loop_no, [{"where": traceback.extract_tb(e.__traceback__)[-1].name,
+                                         "error": f"{type(e).__name__}: {e}"}])
+    logbook.log("errors", loop_no, [{"where": "fetch", "error": w.strip()} for w in drain_warnings()])
+    return stop_reason
 
 
 def wait(seconds):
@@ -92,16 +100,7 @@ def main():
         while True:
             loop_no += 1
             print(f"\n===== loop {loop_no} at {time.strftime('%H:%M:%S')} =====")
-            try:
-                stop_reason = run_loop(loop_no, races, state, regime)
-                state.errors_in_row = 0
-            except Exception as e:
-                stop_reason = None
-                state.errors_in_row += 1
-                print(f"  ERROR ({state.errors_in_row} in a row): {type(e).__name__}: {e}")
-                logbook.log("errors", loop_no, [{"where": traceback.extract_tb(e.__traceback__)[-1].name,
-                                                 "error": f"{type(e).__name__}: {e}"}])
-            logbook.log("errors", loop_no, [{"where": "fetch", "error": w.strip()} for w in drain_warnings()])
+            stop_reason = guarded_loop(loop_no, races, state, regime)
             if stop_reason:
                 print(f"\nKILL SWITCH: {stop_reason}")
                 logbook.log("loops", loop_no, [{"regime": config.REGIME, "status": f"stopped: {stop_reason}"}])

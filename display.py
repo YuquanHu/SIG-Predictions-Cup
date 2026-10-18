@@ -45,22 +45,27 @@ HOLDING_COLUMNS = ("race", "mkt", "side", "shares", "value", "sell", "fair", "ex
 
 
 def holding_cells(h, action):
-    return (h.race or "(not in races.json)", h.market_id, h.side.upper(), f"{h.shares:,.0f}", f"{h.value:,.0f}",
-            fmt(h.sell_price).strip(), fmt(h.fair).strip(),
+    def price(x):
+        return f"{x:.3f}" if x is not None else "-"
+    return (h.race, h.market_id, h.side.upper(), f"{h.shares:,.0f}", f"{h.value:,.0f}",
+            price(h.sell_price), price(h.fair),
             f"{h.exp_return:+.1%}" if h.exp_return is not None else "-", action)
 
 
-def print_report(cash, invested, bankroll, investable, chosen, holdings, sells, notes):
+def print_report(portfolio, chosen, sells, notes):
     """Everything one loop decided, in reading order."""
-    print(f"\ncash {cash:,.0f} | invested {invested:,.0f} ({invested / bankroll:.1%}) | "
-          f"bankroll {bankroll:,.0f} | investable cash {investable:,.0f}")
+    p = portfolio
+    print(f"\ncash {p.cash:,.0f} | invested {p.invested:,.0f} ({p.invested / p.bankroll:.1%}) | "
+          f"bankroll {p.bankroll:,.0f} | investable cash {p.investable:,.0f}")
     print("\nTop opportunities")
     print_table(OPPORTUNITY_COLUMNS, [opportunity_cells(c) for c in chosen])
-    if holdings:
+    if p.holdings or p.outside_value:
         print("\nHoldings")
         actions = {(o.market_id, o.side): o.reason for o in sells}
         print_table(HOLDING_COLUMNS, [holding_cells(h, actions.get((h.market_id, h.side), "hold"))
-                                      for h in holdings])
+                                      for h in p.holdings])
+        if p.outside_value:
+            print(f"  plus {p.outside_value:,.0f} in markets outside races.json (counted, never traded)")
     print("\nSizing")
     for note in notes or ["nothing to size"]:
         print(f"  {note}")

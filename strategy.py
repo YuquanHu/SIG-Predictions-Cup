@@ -116,7 +116,7 @@ def _keep_best(candidates, group, score, reason):
     return [c for c in candidates if c.decision is None]
 
 
-def keep_top(candidates, n=config.TOP_N):
+def keep_top(candidates, n):
     """Pick the trades and record why every candidate was or wasn't picked in `decision`.
 
     1. edge at least MIN_EDGE;  2. equivalent bets keep only the cheaper one;

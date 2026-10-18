@@ -1,10 +1,9 @@
-"""Sizing, exits and swaps. Pure logic: turns opportunities and holdings into orders."""
+"""Sizing, exits and swaps. Pure logic: turns opportunities and a portfolio into orders."""
 import math
 from dataclasses import dataclass
 
 import config
 from orders import Order
-from portfolio import Holding
 from strategy import EPS, Opportunity
 
 
@@ -17,36 +16,34 @@ class Want:
     want: float    # target - held, limited by what the race cap leaves in this race
 
 
-def compute_wants(chosen, holdings, bankroll):
+def compute_wants(chosen, portfolio):
     total_half_kelly = sum(c.half_kelly for c in chosen)
     scale = min(1.0, config.INVEST_CAP / total_half_kelly) if total_half_kelly else 1.0
     wants = []
     for c in chosen:
-        target = c.half_kelly * scale * bankroll
-        held = sum(h.value for h in holdings if h.race == c.race and h.wins_when == c.wins_when)
-        held_in_race = sum(h.value for h in holdings if h.race == c.race)
-        race_room = config.RACE_CAP * bankroll - held_in_race
+        target = c.half_kelly * scale * portfolio.bankroll
+        held = portfolio.held_in_bet(c.race, c.wins_when)
+        race_room = config.RACE_CAP * portfolio.bankroll - portfolio.held_in_race(c.race)
         wants.append(Want(c, target, held, max(0.0, min(target - held, race_room))))
     return wants
 
 
-def _sell(h: Holding, reason):
-    return Order("sell", h.side, h.race, h.market_id, math.floor(min(h.shares, h.sell_depth or 0)),
-                 h.sell_price, h.fair, reason)
+def _sell(h, reason):
+    """Sell what the book will take at the sell price, or nothing when it takes less than one share."""
+    shares = math.floor(min(h.shares, h.sell_depth or 0))
+    return [Order("sell", h.side, h.race, h.market_id, shares, h.sell_price, h.fair, reason)] if shares else []
 
 
-def decide_sells(holdings, wants, investable):
+def decide_sells(portfolio, wants):
     """Sell any position whose fair value fell below its sell price. When no investable cash is left,
     also sell the worst held position for a new bet that beats it by SWAP_MARGIN."""
-    sells, sold = [], set()
-    for h in holdings:
-        if h.negative_edge:
-            sells.append(_sell(h, f"exit: fair {h.fair:.3f} is below sell price {h.sell_price:.3f}"))
-            sold.add(id(h))
+    sells, exiting = [], [h for h in portfolio.holdings if h.negative_edge]
+    for h in exiting:
+        sells += _sell(h, f"exit: fair {h.fair:.3f} is below sell price {h.sell_price:.3f}")
 
-    if investable >= config.MIN_ORDER_VALUE:
+    if portfolio.investable >= config.MIN_ORDER_VALUE:
         return sells
-    worst_first = sorted((h for h in holdings if h.exp_return is not None and id(h) not in sold),
+    worst_first = sorted((h for h in portfolio.holdings if h.exp_return is not None and h not in exiting),
                          key=lambda h: h.exp_return)
     for w in wants:
         if w.want < config.MIN_ORDER_VALUE:
@@ -55,8 +52,8 @@ def decide_sells(holdings, wants, investable):
         if rivals and w.opp.expected_return - rivals[0].exp_return >= config.SWAP_MARGIN - EPS:
             worst = rivals[0]
             worst_first.remove(worst)
-            sells.append(_sell(worst, f"swap: {w.opp.race} {w.opp.side.upper()} {w.opp.market_id} returns "
-                                      f"{w.opp.expected_return:.1%} vs {worst.exp_return:.1%} held"))
+            sells += _sell(worst, f"swap: {w.opp.race} {w.opp.side.upper()} {w.opp.market_id} returns "
+                                  f"{w.opp.expected_return:.1%} vs {worst.exp_return:.1%} held")
     return sells
 
 
