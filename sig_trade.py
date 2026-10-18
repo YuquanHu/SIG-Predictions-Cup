@@ -2,6 +2,7 @@
 API key hidden. The guards here make it impossible to send a market order, an off-tick price, or more
 than MAX_ORDER_SHARES shares in one order."""
 import json
+import time
 import uuid
 
 import requests
@@ -11,6 +12,8 @@ import config
 MIN_ORDER_SHARES = 1  # the docs state no minimum; quantity is an integer, so one share is the smallest order
 MAX_ORDER_SHARES = 1  # hard cap for this test
 TICK, MIN_PRICE, MAX_PRICE = 0.005, 0.005, 0.995
+READ_RETRIES = 4         # extra attempts for a GET that answers 503 (documented as temporary and safe to retry)
+READ_RETRY_PAUSE = 2     # seconds
 
 
 class TradeError(Exception):
@@ -22,16 +25,9 @@ def scrub(text):
 
 
 class Client:
-    def request(self, method, path, params=None, body=None, expect=(200,)):
-        """Send one request, print it and the response, and return (status, json).
-        Any status outside `expect` raises TradeError."""
-        params, body = dict(params or {}), (dict(body) if body is not None else None)
-        if config.SIG_TOURNAMENT_ID:
-            if body is not None:
-                body.setdefault("tournamentId", config.SIG_TOURNAMENT_ID)
-            elif method == "GET":
-                params.setdefault("tournamentId", config.SIG_TOURNAMENT_ID)
-        url = config.SIG_BASE + path
+    @staticmethod
+    def _send(method, url, path, params, body):
+        """One HTTP attempt: print the request, then the response; return (response, parsed json)."""
         print(f"\n>>> {method} {url}" + (f"  params={params}" if params else ""))
         print(">>> Authorization: Bearer ****")
         if body is not None:
@@ -48,6 +44,24 @@ class Client:
             data = {"raw": resp.text[:500]}
         print(f"<<< HTTP {resp.status_code}")
         print(scrub(json.dumps(data, indent=2)))
+        return resp, data
+
+    def request(self, method, path, params=None, body=None, expect=(200,)):
+        """Send one request, print it and the response, and return (status, json).
+        Any status outside `expect` raises TradeError."""
+        params, body = dict(params or {}), (dict(body) if body is not None else None)
+        if config.SIG_TOURNAMENT_ID:
+            if body is not None:
+                body.setdefault("tournamentId", config.SIG_TOURNAMENT_ID)
+            elif method == "GET":
+                params.setdefault("tournamentId", config.SIG_TOURNAMENT_ID)
+        url = config.SIG_BASE + path
+        for attempt in range(READ_RETRIES + 1):
+            resp, data = self._send(method, url, path, params, body)
+            if method != "GET" or resp.status_code != 503 or attempt == READ_RETRIES:
+                break  # orders and cancels are never retried
+            print(f"(read returned 503; retrying in {READ_RETRY_PAUSE}s, attempt {attempt + 2} of {READ_RETRIES + 1})")
+            time.sleep(READ_RETRY_PAUSE)
         if resp.status_code not in expect:
             raise TradeError(f"{method} {path}: unexpected HTTP {resp.status_code}")
         return resp.status_code, data

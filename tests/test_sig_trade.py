@@ -62,6 +62,33 @@ class Classify(unittest.TestCase):
         self.assertEqual(st.classify(placement(open_=False, traded=0), 1), "unexpected")
 
 
+def response(status):
+    r = mock.Mock(status_code=status)
+    r.json.return_value = {"error": {"code": "SERVICE_UNAVAILABLE"}} if status == 503 else {"ok": True}
+    return r
+
+
+@mock.patch("sig_trade.time.sleep")
+class Retries(unittest.TestCase):
+    def test_get_retries_a_503_then_succeeds(self, _sleep):
+        with mock.patch("sig_trade.requests.request", side_effect=[response(503), response(503), response(200)]) as send:
+            status, _ = st.Client().request("GET", "/orders/1")
+        self.assertEqual((status, send.call_count), (200, 3))
+
+    def test_get_gives_up_after_the_retry_limit(self, _sleep):
+        with mock.patch("sig_trade.requests.request", return_value=response(503)) as send:
+            with self.assertRaises(st.TradeError):
+                st.Client().request("GET", "/orders/1")
+        self.assertEqual(send.call_count, st.READ_RETRIES + 1)
+
+    def test_post_and_delete_are_never_retried(self, _sleep):
+        for method, path in (("POST", "/orders"), ("DELETE", "/orders/1")):
+            with mock.patch("sig_trade.requests.request", return_value=response(503)) as send:
+                with self.assertRaises(st.TradeError):
+                    st.Client().request(method, path, body={"x": 1} if method == "POST" else None)
+            self.assertEqual(send.call_count, 1, method)
+
+
 class KeyHidden(unittest.TestCase):
     def test_scrub_removes_the_key(self):
         self.assertNotIn(config.SIG_API_KEY, st.scrub(f"error for key {config.SIG_API_KEY}"))
