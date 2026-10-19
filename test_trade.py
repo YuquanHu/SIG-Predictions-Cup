@@ -4,7 +4,8 @@
     python3 test_trade.py --preflight   # reads only: shows the book, your position, and what it would send
     python3 test_trade.py               # the real test; asks you to type "yes" before every order
 
-Step A  limit buy of 1 Yes far below the bid: it must rest as an open order; cancel it; confirm it is gone.
+Step A  limit buy of 1 Yes far below the bid: it must rest as an open order; leave it for 20 s so you
+        can see it on SIG; cancel it; confirm it is gone.
 Step B  limit buy of 1 Yes at the ask: it must fill; check the position; sell it back at the bid; confirm
         the position is back where it started.
 Step C  a deliberately invalid order (off-tick price), to see how a rejection looks.
@@ -23,6 +24,7 @@ FAR_PRICE = 0.005       # lowest allowed price, for the order that must not fill
 MIN_GAP = 0.05          # step A needs the bid at least this far above FAR_PRICE
 MAX_SPREAD = 0.05       # refuse to trade into a book wider than this
 FILL_TIMEOUT = 30       # seconds to wait for a fill
+REST_SECONDS = 20       # how long step A leaves its order resting before cancelling, so it can be seen on SIG
 SHARES = st.MIN_ORDER_SHARES
 
 
@@ -82,7 +84,7 @@ def preflight(client, exchange):
     print(f"your open orders on this exchange: {len(resting)}")
     print("\n--- PREFLIGHT: nothing below has been sent ---")
     print(f"Step A would send: buy {SHARES} yes @ {FAR_PRICE} (bid is {bid}, gap {bid - FAR_PRICE:.3f}; "
-          f"needs {MIN_GAP}), then cancel it")
+          f"needs {MIN_GAP}), leave it resting {REST_SECONDS}s, then cancel it")
     print(f"Step B would send: buy {SHARES} yes @ {ask}, then sell {SHARES} yes @ {bid}")
     print(f"Step C would send: buy {SHARES} yes @ 0.0025 (off the 0.005 tick), expecting HTTP 400")
     if position < 0:
@@ -90,6 +92,15 @@ def preflight(client, exchange):
               f"opposite-signed buy reduces the position), so after Step B's buy your position should read "
               f"{position + 1:,.0f}, not a separate Yes position. The sell is then converted by the engine into "
               f"a buy of 1 No, and the position should return to {position:,.0f}.")
+
+
+def rest_before_cancel(order_id):
+    """Leave the order on the book for REST_SECONDS so it can be seen on the SIG site."""
+    print(f"\norder {order_id} is resting on the book. Look for it on SIG now. "
+          f"Cancelling in {REST_SECONDS} seconds (Ctrl+C cancels it right away).")
+    for remaining in range(REST_SECONDS, 0, -5):
+        print(f"  {remaining}s left...")
+        time.sleep(min(5, remaining))
 
 
 def step_a(client, exchange):
@@ -108,8 +119,9 @@ def step_a(client, exchange):
         if order_id not in [o["id"] for o in st.open_orders(client, exchange)]:
             raise Stop(f"order {order_id} is not in the open orders list")
         print(f"CHECK: order {order_id} appears in GET /orders (open)")
-    except Exception:
-        st.cancel(client, order_id)  # never leave the test order resting
+        rest_before_cancel(order_id)
+    except BaseException:  # includes Ctrl+C: never leave the test order resting
+        st.cancel(client, order_id)
         raise
     st.cancel(client, order_id)
     wait_for("the order to close", lambda: not st.get_order(client, order_id)["open"], 10, interval=1)
