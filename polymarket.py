@@ -14,7 +14,10 @@ def setup(races):
     """Resolve each Gamma market id to its Yes CLOB token id (one request)."""
     outcomes = {}  # poly_id -> (race_id, code, outcome)
     for race_id, code, o in iter_outcomes(races):
-        outcomes[o["poly_id"]] = (race_id, code, o)
+        if o["poly_id"]:  # outcomes with no Polymarket match are skipped without a warning
+            outcomes[o["poly_id"]] = (race_id, code, o)
+    if not outcomes:
+        return
     try:
         resp = requests.get(
             f"{config.POLY_GAMMA_BASE}/markets",

@@ -21,7 +21,7 @@ def print_races(races):
         for code, o in race["outcomes"].items():
             print(f"  outcome {code}")
             print_quote(f"Kalshi {o['kalshi_id']}", o["kalshi"])
-            print_quote(f"Poly {o['poly_id']}", o["poly"])
+            print_quote(f"Poly {o['poly_id'] or '(no match)'}", o["poly"])
         for c in race["contracts"]:
             yes = c["yes"]
             print(f"  SIG market {c['market_id']} (pays if {c['pays_if']}): {c['title'] or '?'}")

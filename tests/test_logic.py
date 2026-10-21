@@ -1,10 +1,13 @@
 """Offline tests for the trading logic. Run: python3 -m unittest discover -s tests -t ."""
+import json
+import os
+import tempfile
 import time
 import unittest
 
 import config
 from portfolio import Holding, Portfolio
-from races import empty_quote
+from races import empty_quote, load_races
 from safety import RunState, check_loss, check_stop
 from strategy import Opportunity, fair_value, keep_top
 from trading import compute_wants, decide_sells, size_buys
@@ -116,6 +119,22 @@ class ExitsAndSwaps(unittest.TestCase):
         new = opp("C", "3", .50, .70, wins="D", side="yes")
         broke = Portfolio(0.0, held, 0)
         self.assertEqual(decide_sells(broke, compute_wants([new], broke)), [])
+
+
+class MissingPolymarketId(unittest.TestCase):
+    def test_race_without_poly_id_loads_and_prices_from_kalshi_alone(self):
+        raw = {"X-HOUSE": {"name": "X House", "group": "House",
+                           "outcomes": {"D": {"kalshi_id": "K-D"}, "R": {"kalshi_id": "K-R", "poly_id": None}},
+                           "contracts": [{"market_id": "1", "pays_if": "D"}, {"market_id": "2", "pays_if": "R"}]}}
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "races.json")
+            json.dump(raw, open(path, "w"))
+            races = load_races(path)
+        outcomes = races["X-HOUSE"]["outcomes"]
+        self.assertIsNone(outcomes["D"]["poly_id"])
+        self.assertIsNone(outcomes["R"]["poly_id"])
+        outcomes["D"]["kalshi"] = quote(.60, .62)
+        self.assertAlmostEqual(fair_value(outcomes["D"], NOW).value, 0.61)
 
 
 class KillSwitch(unittest.TestCase):

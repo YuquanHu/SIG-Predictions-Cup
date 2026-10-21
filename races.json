@@ -70,5 +70,643 @@
         "pays_if": "R"
       }
     ]
+  },
+  "AZ-01-HOUSE": {
+    "name": "AZ-01 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEAZ1-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEAZ1-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "197",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "198",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "AZ-06-HOUSE": {
+    "name": "AZ-06 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEAZ6-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEAZ6-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "199",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "200",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "CA-22-HOUSE": {
+    "name": "CA-22 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSECA22-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSECA22-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "201",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "202",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "CO-03-HOUSE": {
+    "name": "CO-03 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSECO3-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSECO3-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "205",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "206",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "CO-08-HOUSE": {
+    "name": "CO-08 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSECO8-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSECO8-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "209",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "210",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "FL-13-HOUSE": {
+    "name": "FL-13 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEFL13-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEFL13-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "323",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "212",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "IA-01-HOUSE": {
+    "name": "IA-01 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEIA1-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEIA1-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "213",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "214",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "IA-03-HOUSE": {
+    "name": "IA-03 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEIA3-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEIA3-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "217",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "218",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "ME-02-HOUSE": {
+    "name": "ME-02 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEME2-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEME2-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "221",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "222",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "MI-07-HOUSE": {
+    "name": "MI-07 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEMI7-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEMI7-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "330",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "331",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "MI-10-HOUSE": {
+    "name": "MI-10 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEMI10-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEMI10-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "332",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "333",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "MN-02-HOUSE": {
+    "name": "MN-02 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEMN2-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEMN2-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "336",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "337",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "MT-01-HOUSE": {
+    "name": "MT-01 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEMT1-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEMT1-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "223",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "224",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "NE-02-HOUSE": {
+    "name": "NE-02 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSENE2-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSENE2-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "225",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "226",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "NH-01-HOUSE": {
+    "name": "NH-01 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSENH1-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSENH1-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "375",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "376",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "NJ-07-HOUSE": {
+    "name": "NJ-07 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSENJ7-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSENJ7-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "227",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "228",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "NY-17-HOUSE": {
+    "name": "NY-17 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSENY17-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSENY17-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "231",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "232",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "PA-01-HOUSE": {
+    "name": "PA-01 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEPA1-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEPA1-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "233",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "234",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "PA-07-HOUSE": {
+    "name": "PA-07 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEPA7-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEPA7-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "235",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "236",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "PA-08-HOUSE": {
+    "name": "PA-08 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEPA8-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEPA8-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "237",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "238",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "PA-10-HOUSE": {
+    "name": "PA-10 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEPA10-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEPA10-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "239",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "240",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "TX-15-HOUSE": {
+    "name": "TX-15 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSETX15-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSETX15-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "243",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "244",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "TX-28-HOUSE": {
+    "name": "TX-28 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSETX28-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSETX28-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "247",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "248",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "VA-01-HOUSE": {
+    "name": "VA-01 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEVA1-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEVA1-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "342",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "249",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "VA-02-HOUSE": {
+    "name": "VA-02 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEVA2-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEVA2-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "343",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "250",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "VA-07-HOUSE": {
+    "name": "VA-07 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEVA7-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEVA7-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "251",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "346",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "WA-03-HOUSE": {
+    "name": "WA-03 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEWA3-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEWA3-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "347",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "348",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "WI-01-HOUSE": {
+    "name": "WI-01 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEWI1-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEWI1-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "349",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "350",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "WI-03-HOUSE": {
+    "name": "WI-03 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "HOUSEWI3-26-D"
+      },
+      "R": {
+        "kalshi_id": "HOUSEWI3-26-R"
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "351",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "352",
+        "pays_if": "R"
+      }
+    ]
   }
 }

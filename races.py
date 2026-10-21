@@ -45,7 +45,7 @@ def load_races(path):
         outcomes = {
             code: {
                 "kalshi_id": o["kalshi_id"],
-                "poly_id": str(o["poly_id"]).strip(),
+                "poly_id": str(o["poly_id"]).strip() if o.get("poly_id") else None,  # None: not matched on Polymarket yet
                 "poly_yes_token": None,  # filled by polymarket.setup
                 "kalshi": empty_quote(),
                 "poly": empty_quote(),
