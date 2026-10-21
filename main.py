@@ -18,7 +18,7 @@ import sig
 from display import print_report
 from feeds import fetch_all, setup_all
 from portfolio import build_portfolio
-from races import drain_warnings, load_races
+from races import disabled_races, drain_warnings, load_races
 from safety import RunState, check_loss, check_stop, stop_file_exists
 from strategy import compute_fair_values, find_opportunities, keep_top
 from trading import compute_wants, decide_sells, size_buys
@@ -93,6 +93,7 @@ def main():
     print(f"DRY RUN: no orders are sent. {len(races)} race(s), regime {config.REGIME} "
           f"(order timeout {regime.order_timeout}s, loop pause {regime.loop_pause}s). "
           f"Create {config.STOP_FILE} or press Ctrl+C to stop.")
+    print(f"{len(disabled_races(config.RACES_FILE))} race(s) are disabled in races.json and are not traded.")
     setup_all(races)
 
     state, loop_no = RunState(), 0

@@ -71,15 +71,681 @@
       }
     ]
   },
+  "AK-SEN": {
+    "name": "Alaska Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEAK-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEAK-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "377",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "378",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "AL-SEN": {
+    "name": "Alabama Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEAL-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEAL-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "252",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "253",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "AR-SEN": {
+    "name": "Arkansas Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEAR-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEAR-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "254",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "255",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "CO-SEN": {
+    "name": "Colorado Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATECO-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATECO-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "256",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "257",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "GA-SEN": {
+    "name": "Georgia Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEGA-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEGA-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "258",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "259",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "IA-SEN": {
+    "name": "Iowa Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEIA-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEIA-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "260",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "261",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "IL-SEN": {
+    "name": "Illinois Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEIL-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEIL-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "264",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "265",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "KS-SEN": {
+    "name": "Kansas Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEKS-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEKS-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "356",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "357",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "KY-SEN": {
+    "name": "Kentucky Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATELA-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATELA-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "266",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "267",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "MA-SEN": {
+    "name": "Massachusetts Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEMA-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEMA-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "379",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "380",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "ME-SEN": {
+    "name": "Maine Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEME-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEME-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "270",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "271",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "MI-SEN": {
+    "name": "Michigan Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEMI-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEMI-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "358",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "359",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "MN-SEN": {
+    "name": "Minnesota Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEMN-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEMN-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "360",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "361",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "MS-SEN": {
+    "name": "Mississippi Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEMS-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEMS-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "272",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "273",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "MT-SEN": {
+    "name": "Montana Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEMT-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEMT-26-R",
+        "poly_id": null
+      },
+      "I": {
+        "kalshi_id": "SENATEMT-26-IND",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "274",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "275",
+        "pays_if": "R"
+      },
+      {
+        "market_id": "276",
+        "pays_if": "I"
+      }
+    ]
+  },
+  "NC-SEN": {
+    "name": "North Carolina Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATENC-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATENC-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "277",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "278",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "NE-SEN": {
+    "name": "Nebraska Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATENE-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATENE-26-R",
+        "poly_id": null
+      },
+      "I": {
+        "kalshi_id": "SENATENE-26-DOSB",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "279",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "281",
+        "pays_if": "R"
+      },
+      {
+        "market_id": "280",
+        "pays_if": "I"
+      }
+    ]
+  },
+  "NJ-SEN": {
+    "name": "New Jersey Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATENJ-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATENJ-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "282",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "283",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "NM-SEN": {
+    "name": "New Mexico Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATENM-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATENM-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "284",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "285",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "OK-SEN": {
+    "name": "Oklahoma Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEOK-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEOK-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "383",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "286",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "OR-SEN": {
+    "name": "Oregon Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEOR-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEOR-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "287",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "288",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "SC-SEN": {
+    "name": "South Carolina Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATESC-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATESC-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "289",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "290",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "TN-SEN": {
+    "name": "Tennessee Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATETN-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATETN-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "362",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "363",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "TX-SEN": {
+    "name": "Texas Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATETX-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATETX-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "293",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "294",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "VA-SEN": {
+    "name": "Virginia Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEVA-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEVA-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "295",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "364",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "WV-SEN": {
+    "name": "West Virginia Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEWV-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEWV-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "296",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "297",
+        "pays_if": "R"
+      }
+    ]
+  },
+  "WY-SEN": {
+    "name": "Wyoming Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEWY-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEWY-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "365",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "366",
+        "pays_if": "R"
+      }
+    ]
+  },
   "AZ-01-HOUSE": {
     "name": "AZ-01 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEAZ1-26-D"
+        "kalshi_id": "HOUSEAZ1-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEAZ1-26-R"
+        "kalshi_id": "HOUSEAZ1-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -98,10 +764,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEAZ6-26-D"
+        "kalshi_id": "HOUSEAZ6-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEAZ6-26-R"
+        "kalshi_id": "HOUSEAZ6-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -120,10 +788,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSECA22-26-D"
+        "kalshi_id": "HOUSECA22-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSECA22-26-R"
+        "kalshi_id": "HOUSECA22-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -142,10 +812,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSECO3-26-D"
+        "kalshi_id": "HOUSECO3-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSECO3-26-R"
+        "kalshi_id": "HOUSECO3-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -164,10 +836,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSECO8-26-D"
+        "kalshi_id": "HOUSECO8-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSECO8-26-R"
+        "kalshi_id": "HOUSECO8-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -186,10 +860,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEFL13-26-D"
+        "kalshi_id": "HOUSEFL13-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEFL13-26-R"
+        "kalshi_id": "HOUSEFL13-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -208,10 +884,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEIA1-26-D"
+        "kalshi_id": "HOUSEIA1-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEIA1-26-R"
+        "kalshi_id": "HOUSEIA1-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -230,10 +908,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEIA3-26-D"
+        "kalshi_id": "HOUSEIA3-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEIA3-26-R"
+        "kalshi_id": "HOUSEIA3-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -252,10 +932,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEME2-26-D"
+        "kalshi_id": "HOUSEME2-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEME2-26-R"
+        "kalshi_id": "HOUSEME2-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -274,10 +956,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEMI7-26-D"
+        "kalshi_id": "HOUSEMI7-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEMI7-26-R"
+        "kalshi_id": "HOUSEMI7-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -296,10 +980,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEMI10-26-D"
+        "kalshi_id": "HOUSEMI10-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEMI10-26-R"
+        "kalshi_id": "HOUSEMI10-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -318,10 +1004,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEMN2-26-D"
+        "kalshi_id": "HOUSEMN2-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEMN2-26-R"
+        "kalshi_id": "HOUSEMN2-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -340,10 +1028,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEMT1-26-D"
+        "kalshi_id": "HOUSEMT1-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEMT1-26-R"
+        "kalshi_id": "HOUSEMT1-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -362,10 +1052,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSENE2-26-D"
+        "kalshi_id": "HOUSENE2-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSENE2-26-R"
+        "kalshi_id": "HOUSENE2-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -384,10 +1076,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSENH1-26-D"
+        "kalshi_id": "HOUSENH1-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSENH1-26-R"
+        "kalshi_id": "HOUSENH1-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -406,10 +1100,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSENJ7-26-D"
+        "kalshi_id": "HOUSENJ7-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSENJ7-26-R"
+        "kalshi_id": "HOUSENJ7-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -428,10 +1124,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSENY17-26-D"
+        "kalshi_id": "HOUSENY17-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSENY17-26-R"
+        "kalshi_id": "HOUSENY17-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -450,10 +1148,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEPA1-26-D"
+        "kalshi_id": "HOUSEPA1-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEPA1-26-R"
+        "kalshi_id": "HOUSEPA1-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -472,10 +1172,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEPA7-26-D"
+        "kalshi_id": "HOUSEPA7-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEPA7-26-R"
+        "kalshi_id": "HOUSEPA7-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -494,10 +1196,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEPA8-26-D"
+        "kalshi_id": "HOUSEPA8-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEPA8-26-R"
+        "kalshi_id": "HOUSEPA8-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -516,10 +1220,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEPA10-26-D"
+        "kalshi_id": "HOUSEPA10-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEPA10-26-R"
+        "kalshi_id": "HOUSEPA10-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -538,10 +1244,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSETX15-26-D"
+        "kalshi_id": "HOUSETX15-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSETX15-26-R"
+        "kalshi_id": "HOUSETX15-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -560,10 +1268,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSETX28-26-D"
+        "kalshi_id": "HOUSETX28-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSETX28-26-R"
+        "kalshi_id": "HOUSETX28-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -582,10 +1292,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEVA1-26-D"
+        "kalshi_id": "HOUSEVA1-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEVA1-26-R"
+        "kalshi_id": "HOUSEVA1-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -604,10 +1316,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEVA2-26-D"
+        "kalshi_id": "HOUSEVA2-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEVA2-26-R"
+        "kalshi_id": "HOUSEVA2-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -626,10 +1340,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEVA7-26-D"
+        "kalshi_id": "HOUSEVA7-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEVA7-26-R"
+        "kalshi_id": "HOUSEVA7-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -648,10 +1364,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEWA3-26-D"
+        "kalshi_id": "HOUSEWA3-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEWA3-26-R"
+        "kalshi_id": "HOUSEWA3-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -670,10 +1388,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEWI1-26-D"
+        "kalshi_id": "HOUSEWI1-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEWI1-26-R"
+        "kalshi_id": "HOUSEWI1-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -692,10 +1412,12 @@
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": "HOUSEWI3-26-D"
+        "kalshi_id": "HOUSEWI3-26-D",
+        "poly_id": null
       },
       "R": {
-        "kalshi_id": "HOUSEWI3-26-R"
+        "kalshi_id": "HOUSEWI3-26-R",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -708,5 +1430,551 @@
         "pays_if": "R"
       }
     ]
+  },
+  "FL-SEN": {
+    "name": "Florida Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEFLS-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEFLS-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "354",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "355",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi's market (SENATEFLS-26) is the Class III special election and its rules do not say a term beginning in 2027; SIG's title does not say which election it is. Same race cannot be confirmed from SIG's text."
+  },
+  "ID-SEN": {
+    "name": "Idaho Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATEID-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATEID-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "262",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "263",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has a third candidate market (SENATEID-26-TACH, Todd Achilles, about 5-6c) with no SIG contract, so Dem Yes and Rep No are not the same bet."
+  },
+  "SD-SEN": {
+    "name": "South Dakota Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": "SENATESD-26-D",
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": "SENATESD-26-R",
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "291",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "292",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has a third candidate market (SENATESD-26-BBEN, Brian Bengs, about 7-8c) with no SIG contract, so Dem Yes and Rep No are not the same bet."
+  },
+  "LA-SEN": {
+    "name": "Louisiana Senate",
+    "group": "Senate",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "268",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "269",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no open Louisiana Senate event (SENATELA-26 is Kentucky)."
+  },
+  "AL-02-HOUSE": {
+    "name": "AL-02 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "318",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "319",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "CA-48-HOUSE": {
+    "name": "CA-48 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "203",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "204",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "CO-04-HOUSE": {
+    "name": "CO-04 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "207",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "208",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "FL-07-HOUSE": {
+    "name": "FL-07 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "320",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "321",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "FL-09-HOUSE": {
+    "name": "FL-09 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "211",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "322",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "FL-16-HOUSE": {
+    "name": "FL-16 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "324",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "325",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "FL-20-HOUSE": {
+    "name": "FL-20 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "326",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "327",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "FL-22-HOUSE": {
+    "name": "FL-22 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "328",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "329",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "IA-02-HOUSE": {
+    "name": "IA-02 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "215",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "216",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "KY-04-HOUSE": {
+    "name": "KY-04 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "219",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "220",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "MN-01-HOUSE": {
+    "name": "MN-01 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "334",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "335",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "MN-05-HOUSE": {
+    "name": "MN-05 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "338",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "339",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "NY-13-HOUSE": {
+    "name": "NY-13 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "229",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "230",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "SC-01-HOUSE": {
+    "name": "SC-01 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "241",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "242",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "TN-05-HOUSE": {
+    "name": "TN-05 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "340",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "341",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "TX-23-HOUSE": {
+    "name": "TX-23 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "245",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "246",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
+  },
+  "VA-05-HOUSE": {
+    "name": "VA-05 House",
+    "group": "House",
+    "outcomes": {
+      "D": {
+        "kalshi_id": null,
+        "poly_id": null
+      },
+      "R": {
+        "kalshi_id": null,
+        "poly_id": null
+      }
+    },
+    "contracts": [
+      {
+        "market_id": "344",
+        "pays_if": "D"
+      },
+      {
+        "market_id": "345",
+        "pays_if": "R"
+      }
+    ],
+    "enabled": false,
+    "disabled_reason": "Kalshi has no House market for this district."
   }
 }

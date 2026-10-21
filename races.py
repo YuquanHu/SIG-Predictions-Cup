@@ -36,12 +36,23 @@ def drain_warnings():
     return drained
 
 
-def load_races(path):
+def _read_races_file(path):
     with open(path) as f:
-        raw = json.load(f)
+        return json.load(f)
 
+
+def disabled_races(path):
+    """{race_id: reason} for races switched off in races.json with "enabled": false."""
+    return {race_id: r.get("disabled_reason", "no reason given")
+            for race_id, r in _read_races_file(path).items() if r.get("enabled", True) is False}
+
+
+def load_races(path):
+    """The enabled races. A race with "enabled": false is skipped and never fetched."""
     races = {}
-    for race_id, r in raw.items():
+    for race_id, r in _read_races_file(path).items():
+        if r.get("enabled", True) is False:
+            continue
         outcomes = {
             code: {
                 "kalshi_id": o["kalshi_id"],

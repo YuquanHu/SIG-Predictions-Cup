@@ -7,7 +7,7 @@ import unittest
 
 import config
 from portfolio import Holding, Portfolio
-from races import empty_quote, load_races
+from races import disabled_races, empty_quote, load_races
 from safety import RunState, check_loss, check_stop
 from strategy import Opportunity, fair_value, keep_top
 from trading import compute_wants, decide_sells, size_buys
@@ -135,6 +135,20 @@ class MissingPolymarketId(unittest.TestCase):
         self.assertIsNone(outcomes["R"]["poly_id"])
         outcomes["D"]["kalshi"] = quote(.60, .62)
         self.assertAlmostEqual(fair_value(outcomes["D"], NOW).value, 0.61)
+
+
+class DisabledRaces(unittest.TestCase):
+    def test_disabled_race_is_skipped_and_its_reason_reported(self):
+        on = {"name": "On", "group": "House", "outcomes": {"D": {"kalshi_id": "K-D", "poly_id": None}},
+              "contracts": [{"market_id": "1", "pays_if": "D"}]}
+        off = {"name": "Off", "group": "House", "enabled": False, "disabled_reason": "no Kalshi market",
+               "outcomes": {"D": {"kalshi_id": None, "poly_id": None}},
+               "contracts": [{"market_id": "2", "pays_if": "D"}]}
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "races.json")
+            json.dump({"ON": on, "OFF": off}, open(path, "w"))
+            self.assertEqual(list(load_races(path)), ["ON"])
+            self.assertEqual(disabled_races(path), {"OFF": "no Kalshi market"})
 
 
 class KillSwitch(unittest.TestCase):
