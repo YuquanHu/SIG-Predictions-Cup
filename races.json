@@ -93,7 +93,8 @@
         "market_id": "378",
         "pays_if": "R"
       }
-    ]
+    ],
+    "poly_note": "Polymarket (alaska-senate-election-winner) lists candidates by name (Sullivan, Peltola), not parties, so it is not the same contract; poly_id left null."
   },
   "AL-SEN": {
     "name": "Alabama Senate",
@@ -101,11 +102,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEAL-26-D",
-        "poly_id": null
+        "poly_id": "630627"
       },
       "R": {
         "kalshi_id": "SENATEAL-26-R",
-        "poly_id": null
+        "poly_id": "630628"
       }
     },
     "contracts": [
@@ -125,11 +126,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEAR-26-D",
-        "poly_id": null
+        "poly_id": "630653"
       },
       "R": {
         "kalshi_id": "SENATEAR-26-R",
-        "poly_id": null
+        "poly_id": "630654"
       }
     },
     "contracts": [
@@ -149,11 +150,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATECO-26-D",
-        "poly_id": null
+        "poly_id": "630666"
       },
       "R": {
         "kalshi_id": "SENATECO-26-R",
-        "poly_id": null
+        "poly_id": "630667"
       }
     },
     "contracts": [
@@ -173,11 +174,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEGA-26-D",
-        "poly_id": null
+        "poly_id": "630692"
       },
       "R": {
         "kalshi_id": "SENATEGA-26-R",
-        "poly_id": null
+        "poly_id": "630693"
       }
     },
     "contracts": [
@@ -197,11 +198,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEIA-26-D",
-        "poly_id": null
+        "poly_id": "630733"
       },
       "R": {
         "kalshi_id": "SENATEIA-26-R",
-        "poly_id": null
+        "poly_id": "630734"
       }
     },
     "contracts": [
@@ -221,11 +222,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEIL-26-D",
-        "poly_id": null
+        "poly_id": "630720"
       },
       "R": {
         "kalshi_id": "SENATEIL-26-R",
-        "poly_id": null
+        "poly_id": "630721"
       }
     },
     "contracts": [
@@ -245,11 +246,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEKS-26-D",
-        "poly_id": null
+        "poly_id": "630746"
       },
       "R": {
         "kalshi_id": "SENATEKS-26-R",
-        "poly_id": null
+        "poly_id": "630747"
       }
     },
     "contracts": [
@@ -269,11 +270,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATELA-26-D",
-        "poly_id": null
+        "poly_id": "630759"
       },
       "R": {
         "kalshi_id": "SENATELA-26-R",
-        "poly_id": null
+        "poly_id": "630760"
       }
     },
     "contracts": [
@@ -293,11 +294,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEMA-26-D",
-        "poly_id": null
+        "poly_id": "630790"
       },
       "R": {
         "kalshi_id": "SENATEMA-26-R",
-        "poly_id": null
+        "poly_id": "630791"
       }
     },
     "contracts": [
@@ -317,11 +318,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEME-26-D",
-        "poly_id": null
+        "poly_id": "630772"
       },
       "R": {
         "kalshi_id": "SENATEME-26-R",
-        "poly_id": null
+        "poly_id": "630773"
       }
     },
     "contracts": [
@@ -341,11 +342,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEMI-26-D",
-        "poly_id": null
+        "poly_id": "630805"
       },
       "R": {
         "kalshi_id": "SENATEMI-26-R",
-        "poly_id": null
+        "poly_id": "630806"
       }
     },
     "contracts": [
@@ -365,11 +366,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEMN-26-D",
-        "poly_id": null
+        "poly_id": "630818"
       },
       "R": {
         "kalshi_id": "SENATEMN-26-R",
-        "poly_id": null
+        "poly_id": "630819"
       }
     },
     "contracts": [
@@ -389,11 +390,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEMS-26-D",
-        "poly_id": null
+        "poly_id": "631017"
       },
       "R": {
         "kalshi_id": "SENATEMS-26-R",
-        "poly_id": null
+        "poly_id": "631018"
       }
     },
     "contracts": [
@@ -413,15 +414,15 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEMT-26-D",
-        "poly_id": null
+        "poly_id": "630831"
       },
       "R": {
         "kalshi_id": "SENATEMT-26-R",
-        "poly_id": null
+        "poly_id": "630832"
       },
       "I": {
         "kalshi_id": "SENATEMT-26-IND",
-        "poly_id": null
+        "poly_id": "630833"
       }
     },
     "contracts": [
@@ -445,11 +446,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATENC-26-D",
-        "poly_id": null
+        "poly_id": "630883"
       },
       "R": {
         "kalshi_id": "SENATENC-26-R",
-        "poly_id": null
+        "poly_id": "630884"
       }
     },
     "contracts": [
@@ -469,15 +470,15 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATENE-26-D",
-        "poly_id": null
+        "poly_id": "634891"
       },
       "R": {
         "kalshi_id": "SENATENE-26-R",
-        "poly_id": null
+        "poly_id": "634892"
       },
       "I": {
         "kalshi_id": "SENATENE-26-DOSB",
-        "poly_id": null
+        "poly_id": "634893"
       }
     },
     "contracts": [
@@ -501,11 +502,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATENJ-26-D",
-        "poly_id": null
+        "poly_id": "630857"
       },
       "R": {
         "kalshi_id": "SENATENJ-26-R",
-        "poly_id": null
+        "poly_id": "630858"
       }
     },
     "contracts": [
@@ -525,11 +526,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATENM-26-D",
-        "poly_id": null
+        "poly_id": "630870"
       },
       "R": {
         "kalshi_id": "SENATENM-26-R",
-        "poly_id": null
+        "poly_id": "630871"
       }
     },
     "contracts": [
@@ -549,11 +550,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEOK-26-D",
-        "poly_id": null
+        "poly_id": "631030"
       },
       "R": {
         "kalshi_id": "SENATEOK-26-R",
-        "poly_id": null
+        "poly_id": "631031"
       }
     },
     "contracts": [
@@ -573,11 +574,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEOR-26-D",
-        "poly_id": null
+        "poly_id": "630898"
       },
       "R": {
         "kalshi_id": "SENATEOR-26-R",
-        "poly_id": null
+        "poly_id": "630899"
       }
     },
     "contracts": [
@@ -597,11 +598,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATESC-26-D",
-        "poly_id": null
+        "poly_id": "630924"
       },
       "R": {
         "kalshi_id": "SENATESC-26-R",
-        "poly_id": null
+        "poly_id": "630925"
       }
     },
     "contracts": [
@@ -621,11 +622,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATETN-26-D",
-        "poly_id": null
+        "poly_id": "630950"
       },
       "R": {
         "kalshi_id": "SENATETN-26-R",
-        "poly_id": null
+        "poly_id": "630951"
       }
     },
     "contracts": [
@@ -645,11 +646,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATETX-26-D",
-        "poly_id": null
+        "poly_id": "630963"
       },
       "R": {
         "kalshi_id": "SENATETX-26-R",
-        "poly_id": null
+        "poly_id": "630964"
       }
     },
     "contracts": [
@@ -669,11 +670,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEVA-26-D",
-        "poly_id": null
+        "poly_id": "630976"
       },
       "R": {
         "kalshi_id": "SENATEVA-26-R",
-        "poly_id": null
+        "poly_id": "630977"
       }
     },
     "contracts": [
@@ -693,11 +694,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEWV-26-D",
-        "poly_id": null
+        "poly_id": "630989"
       },
       "R": {
         "kalshi_id": "SENATEWV-26-R",
-        "poly_id": null
+        "poly_id": "630990"
       }
     },
     "contracts": [
@@ -717,11 +718,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEWY-26-D",
-        "poly_id": null
+        "poly_id": "631002"
       },
       "R": {
         "kalshi_id": "SENATEWY-26-R",
-        "poly_id": null
+        "poly_id": "631003"
       }
     },
     "contracts": [
@@ -741,11 +742,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEAZ1-26-D",
-        "poly_id": null
+        "poly_id": "942084"
       },
       "R": {
         "kalshi_id": "HOUSEAZ1-26-R",
-        "poly_id": null
+        "poly_id": "942082"
       }
     },
     "contracts": [
@@ -765,11 +766,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEAZ6-26-D",
-        "poly_id": null
+        "poly_id": "942162"
       },
       "R": {
         "kalshi_id": "HOUSEAZ6-26-R",
-        "poly_id": null
+        "poly_id": "942159"
       }
     },
     "contracts": [
@@ -789,11 +790,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSECA22-26-D",
-        "poly_id": null
+        "poly_id": "703686"
       },
       "R": {
         "kalshi_id": "HOUSECA22-26-R",
-        "poly_id": null
+        "poly_id": "703685"
       }
     },
     "contracts": [
@@ -813,11 +814,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSECO3-26-D",
-        "poly_id": null
+        "poly_id": "942304"
       },
       "R": {
         "kalshi_id": "HOUSECO3-26-R",
-        "poly_id": null
+        "poly_id": "942301"
       }
     },
     "contracts": [
@@ -837,11 +838,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSECO8-26-D",
-        "poly_id": null
+        "poly_id": "942325"
       },
       "R": {
         "kalshi_id": "HOUSECO8-26-R",
-        "poly_id": null
+        "poly_id": "942324"
       }
     },
     "contracts": [
@@ -861,11 +862,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEFL13-26-D",
-        "poly_id": null
+        "poly_id": "942401"
       },
       "R": {
         "kalshi_id": "HOUSEFL13-26-R",
-        "poly_id": null
+        "poly_id": "942400"
       }
     },
     "contracts": [
@@ -885,11 +886,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEIA1-26-D",
-        "poly_id": null
+        "poly_id": "942433"
       },
       "R": {
         "kalshi_id": "HOUSEIA1-26-R",
-        "poly_id": null
+        "poly_id": "942432"
       }
     },
     "contracts": [
@@ -909,11 +910,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEIA3-26-D",
-        "poly_id": null
+        "poly_id": "942445"
       },
       "R": {
         "kalshi_id": "HOUSEIA3-26-R",
-        "poly_id": null
+        "poly_id": "942444"
       }
     },
     "contracts": [
@@ -933,11 +934,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEME2-26-D",
-        "poly_id": null
+        "poly_id": "3006483"
       },
       "R": {
         "kalshi_id": "HOUSEME2-26-R",
-        "poly_id": null
+        "poly_id": "3006482"
       }
     },
     "contracts": [
@@ -957,11 +958,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEMI7-26-D",
-        "poly_id": null
+        "poly_id": "942722"
       },
       "R": {
         "kalshi_id": "HOUSEMI7-26-R",
-        "poly_id": null
+        "poly_id": "942721"
       }
     },
     "contracts": [
@@ -981,11 +982,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEMI10-26-D",
-        "poly_id": null
+        "poly_id": "942776"
       },
       "R": {
         "kalshi_id": "HOUSEMI10-26-R",
-        "poly_id": null
+        "poly_id": "942774"
       }
     },
     "contracts": [
@@ -1005,11 +1006,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEMN2-26-D",
-        "poly_id": null
+        "poly_id": "942820"
       },
       "R": {
         "kalshi_id": "HOUSEMN2-26-R",
-        "poly_id": null
+        "poly_id": "942819"
       }
     },
     "contracts": [
@@ -1029,11 +1030,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEMT1-26-D",
-        "poly_id": null
+        "poly_id": "942843"
       },
       "R": {
         "kalshi_id": "HOUSEMT1-26-R",
-        "poly_id": null
+        "poly_id": "942841"
       }
     },
     "contracts": [
@@ -1053,11 +1054,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSENE2-26-D",
-        "poly_id": null
+        "poly_id": "942878"
       },
       "R": {
         "kalshi_id": "HOUSENE2-26-R",
-        "poly_id": null
+        "poly_id": "942877"
       }
     },
     "contracts": [
@@ -1077,11 +1078,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSENH1-26-D",
-        "poly_id": null
+        "poly_id": "942910"
       },
       "R": {
         "kalshi_id": "HOUSENH1-26-R",
-        "poly_id": null
+        "poly_id": "942909"
       }
     },
     "contracts": [
@@ -1101,11 +1102,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSENJ7-26-D",
-        "poly_id": null
+        "poly_id": "942979"
       },
       "R": {
         "kalshi_id": "HOUSENJ7-26-R",
-        "poly_id": null
+        "poly_id": "942978"
       }
     },
     "contracts": [
@@ -1125,11 +1126,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSENY17-26-D",
-        "poly_id": null
+        "poly_id": "943441"
       },
       "R": {
         "kalshi_id": "HOUSENY17-26-R",
-        "poly_id": null
+        "poly_id": "943440"
       }
     },
     "contracts": [
@@ -1149,11 +1150,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEPA1-26-D",
-        "poly_id": null
+        "poly_id": "943749"
       },
       "R": {
         "kalshi_id": "HOUSEPA1-26-R",
-        "poly_id": null
+        "poly_id": "943748"
       }
     },
     "contracts": [
@@ -1173,11 +1174,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEPA7-26-D",
-        "poly_id": null
+        "poly_id": "943797"
       },
       "R": {
         "kalshi_id": "HOUSEPA7-26-R",
-        "poly_id": null
+        "poly_id": "943796"
       }
     },
     "contracts": [
@@ -1197,11 +1198,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEPA8-26-D",
-        "poly_id": null
+        "poly_id": "943943"
       },
       "R": {
         "kalshi_id": "HOUSEPA8-26-R",
-        "poly_id": null
+        "poly_id": "943942"
       }
     },
     "contracts": [
@@ -1221,11 +1222,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEPA10-26-D",
-        "poly_id": null
+        "poly_id": "943955"
       },
       "R": {
         "kalshi_id": "HOUSEPA10-26-R",
-        "poly_id": null
+        "poly_id": "943954"
       }
     },
     "contracts": [
@@ -1245,11 +1246,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSETX15-26-D",
-        "poly_id": null
+        "poly_id": "944201"
       },
       "R": {
         "kalshi_id": "HOUSETX15-26-R",
-        "poly_id": null
+        "poly_id": "944199"
       }
     },
     "contracts": [
@@ -1269,11 +1270,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSETX28-26-D",
-        "poly_id": null
+        "poly_id": "944222"
       },
       "R": {
         "kalshi_id": "HOUSETX28-26-R",
-        "poly_id": null
+        "poly_id": "944221"
       }
     },
     "contracts": [
@@ -1293,11 +1294,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEVA1-26-D",
-        "poly_id": null
+        "poly_id": "944282"
       },
       "R": {
         "kalshi_id": "HOUSEVA1-26-R",
-        "poly_id": null
+        "poly_id": "944281"
       }
     },
     "contracts": [
@@ -1317,11 +1318,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEVA2-26-D",
-        "poly_id": null
+        "poly_id": "944290"
       },
       "R": {
         "kalshi_id": "HOUSEVA2-26-R",
-        "poly_id": null
+        "poly_id": "944289"
       }
     },
     "contracts": [
@@ -1341,11 +1342,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEVA7-26-D",
-        "poly_id": null
+        "poly_id": "944298"
       },
       "R": {
         "kalshi_id": "HOUSEVA7-26-R",
-        "poly_id": null
+        "poly_id": "944297"
       }
     },
     "contracts": [
@@ -1365,11 +1366,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEWA3-26-D",
-        "poly_id": null
+        "poly_id": "944314"
       },
       "R": {
         "kalshi_id": "HOUSEWA3-26-R",
-        "poly_id": null
+        "poly_id": "944313"
       }
     },
     "contracts": [
@@ -1389,11 +1390,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEWI1-26-D",
-        "poly_id": null
+        "poly_id": "944334"
       },
       "R": {
         "kalshi_id": "HOUSEWI1-26-R",
-        "poly_id": null
+        "poly_id": "944333"
       }
     },
     "contracts": [
@@ -1413,11 +1414,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "HOUSEWI3-26-D",
-        "poly_id": null
+        "poly_id": "944342"
       },
       "R": {
         "kalshi_id": "HOUSEWI3-26-R",
-        "poly_id": null
+        "poly_id": "944341"
       }
     },
     "contracts": [
@@ -1437,11 +1438,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYAL-26-D",
-        "poly_id": null
+        "poly_id": "629270"
       },
       "R": {
         "kalshi_id": "GOVPARTYAL-26-R",
-        "poly_id": null
+        "poly_id": "629271"
       }
     },
     "contracts": [
@@ -1461,11 +1462,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYAR-26-D",
-        "poly_id": null
+        "poly_id": "629283"
       },
       "R": {
         "kalshi_id": "GOVPARTYAR-26-R",
-        "poly_id": null
+        "poly_id": "629284"
       }
     },
     "contracts": [
@@ -1485,11 +1486,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYAZ-26-D",
-        "poly_id": null
+        "poly_id": "629183"
       },
       "R": {
         "kalshi_id": "GOVPARTYAZ-26-R",
-        "poly_id": null
+        "poly_id": "629184"
       }
     },
     "contracts": [
@@ -1525,7 +1526,8 @@
         "market_id": "162",
         "pays_if": "R"
       }
-    ]
+    ],
+    "poly_note": "Polymarket (california-governor-election-2026) lists candidates by name (Becerra, Hilton), not parties, so it is not the same contract; poly_id left null."
   },
   "CO-GOV": {
     "name": "Colorado Governor",
@@ -1533,11 +1535,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYCO-26-D",
-        "poly_id": null
+        "poly_id": "629296"
       },
       "R": {
         "kalshi_id": "GOVPARTYCO-26-R",
-        "poly_id": null
+        "poly_id": "629297"
       }
     },
     "contracts": [
@@ -1557,11 +1559,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYCT-26-D",
-        "poly_id": null
+        "poly_id": "629311"
       },
       "R": {
         "kalshi_id": "GOVPARTYCT-26-R",
-        "poly_id": null
+        "poly_id": "629312"
       }
     },
     "contracts": [
@@ -1581,11 +1583,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYFL-26-D",
-        "poly_id": null
+        "poly_id": "629324"
       },
       "R": {
         "kalshi_id": "GOVPARTYFL-26-R",
-        "poly_id": null
+        "poly_id": "629325"
       }
     },
     "contracts": [
@@ -1605,11 +1607,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYGA-26-D",
-        "poly_id": null
+        "poly_id": "629337"
       },
       "R": {
         "kalshi_id": "GOVPARTYGA-26-R",
-        "poly_id": null
+        "poly_id": "629338"
       }
     },
     "contracts": [
@@ -1629,11 +1631,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYHI-26-D",
-        "poly_id": null
+        "poly_id": "629350"
       },
       "R": {
         "kalshi_id": "GOVPARTYHI-26-R",
-        "poly_id": null
+        "poly_id": "629351"
       }
     },
     "contracts": [
@@ -1653,11 +1655,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYIA-26-D",
-        "poly_id": null
+        "poly_id": "629397"
       },
       "R": {
         "kalshi_id": "GOVPARTYIA-26-R",
-        "poly_id": null
+        "poly_id": "629398"
       }
     },
     "contracts": [
@@ -1677,11 +1679,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYID-26-D",
-        "poly_id": null
+        "poly_id": "629363"
       },
       "R": {
         "kalshi_id": "GOVPARTYID-26-R",
-        "poly_id": null
+        "poly_id": "629364"
       }
     },
     "contracts": [
@@ -1701,11 +1703,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYIL-26-D",
-        "poly_id": null
+        "poly_id": "629376"
       },
       "R": {
         "kalshi_id": "GOVPARTYIL-26-R",
-        "poly_id": null
+        "poly_id": "629377"
       }
     },
     "contracts": [
@@ -1725,11 +1727,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYMA-26-D",
-        "poly_id": null
+        "poly_id": "629451"
       },
       "R": {
         "kalshi_id": "GOVPARTYMA-26-R",
-        "poly_id": null
+        "poly_id": "629452"
       }
     },
     "contracts": [
@@ -1749,11 +1751,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYMD-26-D",
-        "poly_id": null
+        "poly_id": "629438"
       },
       "R": {
         "kalshi_id": "GOVPARTYMD-26-R",
-        "poly_id": null
+        "poly_id": "629439"
       }
     },
     "contracts": [
@@ -1773,11 +1775,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYME-26-D",
-        "poly_id": null
+        "poly_id": "629425"
       },
       "R": {
         "kalshi_id": "GOVPARTYME-26-R",
-        "poly_id": null
+        "poly_id": "629426"
       }
     },
     "contracts": [
@@ -1797,11 +1799,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYMI-26-D",
-        "poly_id": null
+        "poly_id": "629464"
       },
       "R": {
         "kalshi_id": "GOVPARTYMI-26-R",
-        "poly_id": null
+        "poly_id": "629465"
       }
     },
     "contracts": [
@@ -1821,11 +1823,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYMN-26-D",
-        "poly_id": null
+        "poly_id": "629477"
       },
       "R": {
         "kalshi_id": "GOVPARTYMN-26-R",
-        "poly_id": null
+        "poly_id": "629478"
       }
     },
     "contracts": [
@@ -1845,11 +1847,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYNE-26-D",
-        "poly_id": null
+        "poly_id": "629490"
       },
       "R": {
         "kalshi_id": "GOVPARTYNE-26-R",
-        "poly_id": null
+        "poly_id": "629491"
       }
     },
     "contracts": [
@@ -1869,11 +1871,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYNM-26-D",
-        "poly_id": null
+        "poly_id": "629531"
       },
       "R": {
         "kalshi_id": "GOVPARTYNM-26-R",
-        "poly_id": null
+        "poly_id": "629532"
       }
     },
     "contracts": [
@@ -1893,11 +1895,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYNV-26-D",
-        "poly_id": null
+        "poly_id": "629505"
       },
       "R": {
         "kalshi_id": "GOVPARTYNV-26-R",
-        "poly_id": null
+        "poly_id": "629506"
       }
     },
     "contracts": [
@@ -1917,11 +1919,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYNY-26-D",
-        "poly_id": null
+        "poly_id": "629544"
       },
       "R": {
         "kalshi_id": "GOVPARTYNY-26-R",
-        "poly_id": null
+        "poly_id": "629545"
       }
     },
     "contracts": [
@@ -1941,11 +1943,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYOK-26-D",
-        "poly_id": null
+        "poly_id": "629570"
       },
       "R": {
         "kalshi_id": "GOVPARTYOK-26-R",
-        "poly_id": null
+        "poly_id": "629571"
       }
     },
     "contracts": [
@@ -1965,11 +1967,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYOR-26-D",
-        "poly_id": null
+        "poly_id": "629583"
       },
       "R": {
         "kalshi_id": "GOVPARTYOR-26-R",
-        "poly_id": null
+        "poly_id": "629584"
       }
     },
     "contracts": [
@@ -1989,11 +1991,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYPA-26-D",
-        "poly_id": null
+        "poly_id": "629614"
       },
       "R": {
         "kalshi_id": "GOVPARTYPA-26-R",
-        "poly_id": null
+        "poly_id": "629615"
       }
     },
     "contracts": [
@@ -2013,11 +2015,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYSC-26-D",
-        "poly_id": null
+        "poly_id": "629640"
       },
       "R": {
         "kalshi_id": "GOVPARTYSC-26-R",
-        "poly_id": null
+        "poly_id": "629641"
       }
     },
     "contracts": [
@@ -2037,11 +2039,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYSD-26-D",
-        "poly_id": null
+        "poly_id": "629653"
       },
       "R": {
         "kalshi_id": "GOVPARTYSD-26-R",
-        "poly_id": null
+        "poly_id": "629654"
       }
     },
     "contracts": [
@@ -2061,11 +2063,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYTX-26-D",
-        "poly_id": null
+        "poly_id": "629690"
       },
       "R": {
         "kalshi_id": "GOVPARTYTX-26-R",
-        "poly_id": null
+        "poly_id": "629691"
       }
     },
     "contracts": [
@@ -2085,11 +2087,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYVT-26-D",
-        "poly_id": null
+        "poly_id": "629707"
       },
       "R": {
         "kalshi_id": "GOVPARTYVT-26-R",
-        "poly_id": null
+        "poly_id": "629708"
       }
     },
     "contracts": [
@@ -2109,11 +2111,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYWI-26-D",
-        "poly_id": null
+        "poly_id": "629720"
       },
       "R": {
         "kalshi_id": "GOVPARTYWI-26-R",
-        "poly_id": null
+        "poly_id": "629721"
       }
     },
     "contracts": [
@@ -2133,11 +2135,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYWY-26-D",
-        "poly_id": null
+        "poly_id": "629733"
       },
       "R": {
         "kalshi_id": "GOVPARTYWY-26-R",
-        "poly_id": null
+        "poly_id": "629734"
       }
     },
     "contracts": [
@@ -2157,11 +2159,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "CONTROLS-2026-D",
-        "poly_id": null
+        "poly_id": "562793"
       },
       "R": {
         "kalshi_id": "CONTROLS-2026-R",
-        "poly_id": null
+        "poly_id": "562794"
       }
     },
     "contracts": [
@@ -2182,11 +2184,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "CONTROLH-2026-D",
-        "poly_id": null
+        "poly_id": "562802"
       },
       "R": {
         "kalshi_id": "CONTROLH-2026-R",
-        "poly_id": null
+        "poly_id": "562803"
       }
     },
     "contracts": [
@@ -2207,11 +2209,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEFLS-26-D",
-        "poly_id": null
+        "poly_id": "631044"
       },
       "R": {
         "kalshi_id": "SENATEFLS-26-R",
-        "poly_id": null
+        "poly_id": "631045"
       }
     },
     "contracts": [
@@ -2233,11 +2235,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEID-26-D",
-        "poly_id": null
+        "poly_id": "630705"
       },
       "R": {
         "kalshi_id": "SENATEID-26-R",
-        "poly_id": null
+        "poly_id": "630706"
       }
     },
     "contracts": [
@@ -2259,11 +2261,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATESD-26-D",
-        "poly_id": null
+        "poly_id": "630937"
       },
       "R": {
         "kalshi_id": "SENATESD-26-R",
-        "poly_id": null
+        "poly_id": "630938"
       }
     },
     "contracts": [
@@ -2285,11 +2287,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "634878"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "634879"
       }
     },
     "contracts": [
@@ -2311,11 +2313,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1280801"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1280800"
       }
     },
     "contracts": [
@@ -2337,11 +2339,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1282825"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1282824"
       }
     },
     "contracts": [
@@ -2363,11 +2365,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1282881"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1282880"
       }
     },
     "contracts": [
@@ -2389,11 +2391,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283001"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283000"
       }
     },
     "contracts": [
@@ -2415,11 +2417,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283017"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283016"
       }
     },
     "contracts": [
@@ -2441,11 +2443,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283065"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283064"
       }
     },
     "contracts": [
@@ -2467,11 +2469,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283097"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283096"
       }
     },
     "contracts": [
@@ -2493,11 +2495,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283113"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283112"
       }
     },
     "contracts": [
@@ -2519,11 +2521,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283289"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283288"
       }
     },
     "contracts": [
@@ -2545,11 +2547,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283569"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283568"
       }
     },
     "contracts": [
@@ -2571,11 +2573,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283849"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283848"
       }
     },
     "contracts": [
@@ -2597,11 +2599,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283873"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1283872"
       }
     },
     "contracts": [
@@ -2623,11 +2625,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1284299"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1284298"
       }
     },
     "contracts": [
@@ -2649,11 +2651,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1284672"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1284671"
       }
     },
     "contracts": [
@@ -2675,11 +2677,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1284768"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1284767"
       }
     },
     "contracts": [
@@ -2701,11 +2703,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1284960"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1284959"
       }
     },
     "contracts": [
@@ -2727,11 +2729,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1285080"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "1285079"
       }
     },
     "contracts": [
@@ -2771,7 +2773,8 @@
       }
     ],
     "enabled": false,
-    "disabled_reason": "Kalshi has no open Alaska governor event."
+    "disabled_reason": "Kalshi has no open Alaska governor event.",
+    "poly_note": "Polymarket (alaska-governor-election-winner) lists candidates by name, not parties; poly_id left null."
   },
   "KS-GOV": {
     "name": "Kansas Governor",
@@ -2779,11 +2782,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "629412"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "629413"
       }
     },
     "contracts": [
@@ -2805,11 +2808,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "629518"
       },
       "R": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "629519"
       }
     },
     "contracts": [
@@ -2831,15 +2834,15 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYRI-26-D",
-        "poly_id": null
+        "poly_id": "629627"
       },
       "R": {
         "kalshi_id": "GOVPARTYRI-26-R",
-        "poly_id": null
+        "poly_id": "629628"
       },
       "I": {
         "kalshi_id": null,
-        "poly_id": null
+        "poly_id": "629629"
       }
     },
     "contracts": [
@@ -2865,11 +2868,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYTN-26-D",
-        "poly_id": null
+        "poly_id": "629666"
       },
       "R": {
         "kalshi_id": "GOVPARTYTN-26-R",
-        "poly_id": null
+        "poly_id": "629667"
       }
     },
     "contracts": [

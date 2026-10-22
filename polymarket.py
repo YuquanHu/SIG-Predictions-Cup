@@ -8,28 +8,35 @@ import config
 from races import clear_quote, iter_outcomes, quote_available, warn
 
 NAME = "Polymarket"
+CHUNK = 50  # Gamma rejects a request for ~180 ids (HTTP 422), so ids and tokens go in chunks of this size
+
+
+def _chunks(items):
+    items = list(items)
+    return [items[i:i + CHUNK] for i in range(0, len(items), CHUNK)]
 
 
 def setup(races):
-    """Resolve each Gamma market id to its Yes CLOB token id (one request)."""
+    """Resolve each Gamma market id to its Yes CLOB token id (one request per CHUNK ids)."""
     outcomes = {}  # poly_id -> (race_id, code, outcome)
     for race_id, code, o in iter_outcomes(races):
         if o["poly_id"]:  # outcomes with no Polymarket match are skipped without a warning
             outcomes[o["poly_id"]] = (race_id, code, o)
-    if not outcomes:
-        return
-    try:
-        resp = requests.get(
-            f"{config.POLY_GAMMA_BASE}/markets",
-            params=[("id", pid) for pid in outcomes],
-            timeout=config.HTTP_TIMEOUT,
-        )
-        resp.raise_for_status()
-        markets = resp.json()
-    except Exception as e:
-        for race_id, code, o in outcomes.values():
-            warn(race_id, NAME, f"{code} ({o['poly_id']}): market lookup failed: {e}")
-        return
+    markets, failed = [], set()
+    for chunk in _chunks(outcomes):
+        try:
+            resp = requests.get(
+                f"{config.POLY_GAMMA_BASE}/markets",
+                params=[("id", pid) for pid in chunk] + [("limit", len(chunk))],
+                timeout=config.HTTP_TIMEOUT,
+            )
+            resp.raise_for_status()
+            markets += resp.json()
+        except Exception as e:  # only this chunk's races lose Polymarket
+            failed.update(chunk)
+            for pid in chunk:
+                race_id, code, o = outcomes[pid]
+                warn(race_id, NAME, f"{code} ({pid}): market lookup failed: {e}")
 
     for m in markets:
         entry = outcomes.get(str(m["id"]))
@@ -41,9 +48,10 @@ def setup(races):
             o["poly_yes_token"] = json.loads(m["clobTokenIds"])[labels.index("Yes")]
         except (KeyError, ValueError, IndexError) as e:
             warn(race_id, NAME, f"{code} ({m['id']}): no Yes token in market data: {e}")
-    for race_id, code, o in outcomes.values():
-        if o["poly_yes_token"] is None:
-            warn(race_id, NAME, f"{code} ({o['poly_id']}): market not found")
+    returned = {str(m["id"]) for m in markets}
+    for pid, (race_id, code, o) in outcomes.items():
+        if pid not in returned and pid not in failed:  # failures and missing tokens already warned
+            warn(race_id, NAME, f"{code} ({pid}): market not found")
 
 
 def _post_books(tokens):
@@ -57,25 +65,26 @@ def _post_books(tokens):
 
 
 def _fetch_books(tokens):
-    """Books for all tokens in one request. If the batch fails, retry one token at a time so a
-    single bad market only loses itself. Returns (books, errors by token)."""
-    try:
-        return _post_books(tokens), {}
-    except Exception:
-        books, errors = [], {}
-        for t in tokens:
-            try:
-                books += _post_books([t])
-            except Exception as e:
-                errors[t] = e
-        return books, errors
+    """Books for all tokens, one request per CHUNK. If a chunk fails, retry its tokens one at a time
+    so a single bad market only loses itself. Returns (books, errors by token)."""
+    books, errors = [], {}
+    for chunk in _chunks(tokens):
+        try:
+            books += _post_books(chunk)
+        except Exception:
+            for t in chunk:
+                try:
+                    books += _post_books([t])
+                except Exception as e:
+                    errors[t] = e
+    return books, errors
 
 
 def fetch_prices(races):
-    """One batched CLOB books request for every Yes token."""
+    """Batched CLOB books requests for every Yes token."""
     for _, _, o in iter_outcomes(races):
         clear_quote(o["poly"])
-    if any(o["poly_yes_token"] is None for _, _, o in iter_outcomes(races)):
+    if any(o["poly_id"] and o["poly_yes_token"] is None for _, _, o in iter_outcomes(races)):
         setup(races)  # retry the lookup; it warns by itself for markets still missing
     outcomes = {o["poly_yes_token"]: (race_id, code, o)
                 for race_id, code, o in iter_outcomes(races) if o["poly_yes_token"]}
