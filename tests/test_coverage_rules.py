@@ -6,7 +6,8 @@ from unittest import mock
 import config
 from portfolio import Portfolio
 from races import empty_quote, fill_missing_bid
-from strategy import Fair, Opportunity, find_opportunities, keep_top, probability_gaps, wins_when
+import kalshi
+from strategy import Fair, Opportunity, fair_value, find_opportunities, keep_top, probability_gaps, wins_when
 from trading import compute_wants
 
 
@@ -62,6 +63,25 @@ class SingleSourceCap(unittest.TestCase):
     def test_one_source_uses_the_smaller_cap(self):
         self.assertAlmostEqual(self.want_for(1), config.SINGLE_SOURCE_RACE_CAP * 100000)
         self.assertLess(config.SINGLE_SOURCE_RACE_CAP, config.RACE_CAP)
+
+
+class SingleSourceRaces(unittest.TestCase):
+    def test_kalshi_sends_no_request_when_no_outcome_has_a_kalshi_id(self):
+        races = race(["D", "R"], {"D": (.5, .6), "R": (.3, .4)})
+        for o in races["X-RACE"]["outcomes"].values():
+            o["kalshi_id"] = None
+        with mock.patch("kalshi.requests.get") as get:
+            kalshi.fetch_prices(races)
+        get.assert_not_called()
+
+    def test_fair_value_works_from_polymarket_alone_and_from_kalshi_alone(self):
+        quote = dict(empty_quote(), bid=0.60, ask=0.62, updated=1.0)
+        poly_only = {"kalshi": empty_quote(), "poly": quote}
+        kalshi_only = {"kalshi": quote, "poly": empty_quote()}
+        for outcome in (poly_only, kalshi_only):
+            fair = fair_value(outcome, now=1.0)
+            self.assertAlmostEqual(fair.value, 0.61)
+            self.assertEqual(fair.sources, 1)
 
 
 class ProbabilitySums(unittest.TestCase):

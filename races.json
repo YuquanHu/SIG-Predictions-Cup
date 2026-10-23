@@ -77,11 +77,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "SENATEAK-26-D",
-        "poly_id": null
+        "poly_id": "634976"
       },
       "R": {
         "kalshi_id": "SENATEAK-26-R",
-        "poly_id": null
+        "poly_id": "634974"
       }
     },
     "contracts": [
@@ -94,7 +94,7 @@
         "pays_if": "R"
       }
     ],
-    "poly_note": "Polymarket (alaska-senate-election-winner) lists candidates by name (Sullivan, Peltola), not parties, so it is not the same contract; poly_id left null."
+    "note": "Polymarket's markets are for people (Peltola, the Democratic nominee; Sullivan, the Republican incumbent), not parties. Two other Republicans are also on the general ballot, so 'Sullivan wins' and 'a Republican wins' can differ slightly."
   },
   "AL-SEN": {
     "name": "Alabama Senate",
@@ -1515,11 +1515,11 @@
     "outcomes": {
       "D": {
         "kalshi_id": "GOVPARTYCA-26-D",
-        "poly_id": null
+        "poly_id": "628941"
       },
       "R": {
         "kalshi_id": "GOVPARTYCA-26-R",
-        "poly_id": null
+        "poly_id": "628940"
       }
     },
     "contracts": [
@@ -1532,7 +1532,7 @@
         "pays_if": "R"
       }
     ],
-    "poly_note": "Polymarket (california-governor-election-2026) lists candidates by name (Becerra, Hilton), not parties, so it is not the same contract; poly_id left null."
+    "note": "Polymarket's markets are for people: Kalshi names the same candidates for its D and R markets (Xavier Becerra, Steve Hilton)."
   },
   "CO-GOV": {
     "name": "Colorado Governor",
@@ -1817,7 +1817,7 @@
       },
       "X": {
         "kalshi_id": "GOVPARTYMI-26-MD",
-        "poly_id": null
+        "poly_id": "629466"
       }
     },
     "contracts": [
@@ -1830,7 +1830,7 @@
         "pays_if": "R"
       }
     ],
-    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
+    "note": "Outcome X is Mike Duggan on Kalshi and 'an independent' on Polymarket; SIG has no contract for it."
   },
   "MN-GOV": {
     "name": "Minnesota Governor",
@@ -2258,7 +2258,7 @@
       },
       "X": {
         "kalshi_id": "SENATEID-26-TACH",
-        "poly_id": null
+        "poly_id": "630707"
       }
     },
     "contracts": [
@@ -2271,7 +2271,7 @@
         "pays_if": "R"
       }
     ],
-    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
+    "note": "Outcome X is Todd Achilles (I) on both Kalshi and Polymarket; SIG has no contract for it."
   },
   "SD-SEN": {
     "name": "South Dakota Senate",
@@ -2287,7 +2287,7 @@
       },
       "X": {
         "kalshi_id": "SENATESD-26-BBEN",
-        "poly_id": null
+        "poly_id": "630939"
       }
     },
     "contracts": [
@@ -2300,7 +2300,7 @@
         "pays_if": "R"
       }
     ],
-    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
+    "note": "Outcome X is Brian Bengs (I) on both Kalshi and Polymarket; SIG has no contract for it."
   },
   "LA-SEN": {
     "name": "Louisiana Senate",
@@ -2827,7 +2827,7 @@
         "poly_id": "629628"
       },
       "I": {
-        "kalshi_id": null,
+        "kalshi_id": "GOVPARTYRI-26-KBLO",
         "poly_id": "629629"
       }
     },
@@ -2845,8 +2845,7 @@
         "pays_if": "I"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "SIG has an Independent contract but Kalshi's third market (GOVPARTYRI-26-KBLO, Ken Block, about 5c) is not described as the independent, so the match cannot be confirmed; the third outcome would be missing from a two-way race."
+    "note": "Outcome I is Ken Block, running as an independent (Kalshi KBLO); Polymarket's market is 'an independent'. SIG's Independent contract is 191."
   },
   "TN-GOV": {
     "name": "Tennessee Governor",
