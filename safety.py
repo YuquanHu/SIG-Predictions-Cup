@@ -1,6 +1,6 @@
 """Kill switch: STOP file, consecutive errors, and daily loss."""
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 import config
@@ -10,8 +10,17 @@ import config
 class RunState:
     errors_in_row: int = 0
     orders_may_be_open: bool = True  # cancel-all is only needed after orders went out (and at start-up)
+    seen_warnings: set = field(default_factory=set)
     day: date | None = None
     day_start_equity: float | None = None
+
+
+def new_warnings(state, current):
+    """The warnings not already seen last loop, so an outage is logged once, not every loop.
+    A warning that goes away and comes back counts as new again."""
+    fresh = [w for w in current if w not in state.seen_warnings]
+    state.seen_warnings = set(current)
+    return fresh
 
 
 def stop_file_exists():

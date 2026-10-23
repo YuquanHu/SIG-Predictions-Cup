@@ -1,4 +1,5 @@
-"""Append-only CSV logs in logs/: one file per kind, header written when the file is created."""
+"""Append-only CSV logs in logs/, one file per kind. They record only what matters: orders, bets that clear the
+minimum edge, loops that placed orders or stopped, and new errors (not the same warning every loop)."""
 import csv
 import os
 import time
@@ -15,22 +16,33 @@ COLUMNS = {
 }
 
 
-def log(kind, loop_no, rows):
-    """Write dict rows to logs/<kind>.csv; `time` and `loop` are filled in here."""
-    if not rows:
-        return
+def _path_for(kind):
+    """logs/<kind>.csv, ready to append to. A file whose columns changed is renamed, not overwritten."""
     os.makedirs(config.LOG_DIR, exist_ok=True)
     path = os.path.join(config.LOG_DIR, f"{kind}.csv")
     if os.path.exists(path):
         with open(path, newline="") as f:
-            if next(csv.reader(f), None) != COLUMNS[kind]:  # columns changed: keep the old file, start a new one
-                os.rename(path, path.replace(".csv", f".old-{int(time.time())}.csv"))
-    is_new = not os.path.exists(path)
+            if next(csv.reader(f), None) == COLUMNS[kind]:
+                return path
+        os.rename(path, path.replace(".csv", f".old-{int(time.time())}.csv"))
+    with open(path, "w", newline="") as f:
+        csv.writer(f).writerow(COLUMNS[kind])
+    return path
+
+
+def init():
+    """Create logs/ and every log file with its header row, so they exist before anything is written."""
+    for kind in COLUMNS:
+        _path_for(kind)
+
+
+def log(kind, loop_no, rows):
+    """Write dict rows to logs/<kind>.csv; `time` and `loop` are filled in here."""
+    if not rows:
+        return
     stamp = time.strftime("%Y-%m-%d %H:%M:%S")
-    with open(path, "a", newline="") as f:
+    with open(_path_for(kind), "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=COLUMNS[kind])
-        if is_new:
-            writer.writeheader()
         for row in rows:
             writer.writerow({"time": stamp, "loop": loop_no, **row})
 

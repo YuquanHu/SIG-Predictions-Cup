@@ -19,9 +19,9 @@ from display import print_report
 from feeds import fetch_all, setup_all
 from portfolio import build_portfolio
 from races import disabled_races, drain_warnings, load_races
-from safety import RunState, check_loss, check_stop, stop_file_exists
+from safety import RunState, check_loss, check_stop, new_warnings, stop_file_exists
 from planner import depth_targets, make_plan
-from strategy import compute_fair_values, probability_gaps
+from strategy import EPS, compute_fair_values, probability_gaps
 
 
 def run_loop(loop_no, races, state, regime):
@@ -63,12 +63,14 @@ def run_loop(loop_no, races, state, regime):
 
     reads, seconds = sig.take_read_count(), time.time() - started
     print(f"\nloop took {seconds:.1f}s, {reads} SIG reads ({len(targets)} depth reads)")
-    logbook.log("opportunities", loop_no, [logbook.opportunity_row(c) for c in plan.candidates])
+    worth_logging = [c for c in plan.candidates if c.edge >= config.MIN_EDGE - EPS]  # not every losing candidate
+    logbook.log("opportunities", loop_no, [logbook.opportunity_row(c) for c in worth_logging])
     logbook.log("orders", loop_no, [logbook.order_row(o) for o in plan.orders])
-    logbook.log("loops", loop_no, [{"regime": config.REGIME, "cash": portfolio.cash, "invested": portfolio.invested,
-                                    "bankroll": portfolio.bankroll, "opportunities": len(plan.chosen),
-                                    "orders": len(plan.orders), "sig_reads": reads, "seconds": round(seconds, 1),
-                                    "status": "ok"}])
+    if plan.orders:  # a quiet loop is not worth a row
+        logbook.log("loops", loop_no, [{"regime": config.REGIME, "cash": portfolio.cash, "invested": portfolio.invested,
+                                        "bankroll": portfolio.bankroll, "opportunities": len(plan.chosen),
+                                        "orders": len(plan.orders), "sig_reads": reads, "seconds": round(seconds, 1),
+                                        "status": "ok"}])
     return None
 
 
@@ -83,7 +85,8 @@ def guarded_loop(loop_no, races, state, regime):
         print(f"  ERROR ({state.errors_in_row} in a row): {type(e).__name__}: {e}")
         logbook.log("errors", loop_no, [{"where": traceback.extract_tb(e.__traceback__)[-1].name,
                                          "error": f"{type(e).__name__}: {e}"}])
-    logbook.log("errors", loop_no, [{"where": "fetch", "error": w.strip()} for w in drain_warnings()])
+    logbook.log("errors", loop_no, [{"where": "fetch", "error": w.strip()}
+                                    for w in new_warnings(state, drain_warnings())])
     return stop_reason
 
 
@@ -109,6 +112,7 @@ def main():
     print(f"{len(disabled_races(config.RACES_FILE))} race(s) are disabled in races.json and are not traded.")
     setup_all(races)
 
+    logbook.init()
     state, loop_no = RunState(), 0
     try:
         while True:
