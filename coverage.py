@@ -16,7 +16,9 @@ import sig
 from display import print_table
 
 KALSHI_EVENTS = f"{config.KALSHI_BASE}/events"
-KALSHI_2026 = ("SENATE", "GOVPARTY", "HOUSE")  # event ticker prefixes; "-26" suffix. CONTROL* is matched separately.
+# Kalshi lists the same race under several ticker families (HOUSE…-26, KXHOUSERACE-…-26, KXSENATELA-26NOV, GOVPARTY…-27),
+# so races are found by event title, never by ticker prefix.
+RACE_TITLE = re.compile(r"^(.+?) (House|Senate|Governor) winner\?$")
 SIG_TITLES = (r"Will the (.+?) win the (.+?) Senate\?$", r"Will the (.+?) win the (.+?) Governor\?$",
               r"Will the (.+?) win the ([A-Z]{2}-\d{2}) House race\?$", r"Will the (.+?) win the U\.S\. (Senate|House)\?$")
 
@@ -44,8 +46,9 @@ def kalshi_events():
             return events
 
 
-def is_2026_politics(event_ticker):
-    return (event_ticker.startswith(KALSHI_2026) and event_ticker.endswith("-26")) or event_ticker.startswith("CONTROL")
+def expected_title(race):
+    name = race["name"]
+    return {"House": f"{name} winner?", "Senate": f"{name} winner?", "Governor": f"{name} winner?"}.get(race["group"])
 
 
 def main():
@@ -69,18 +72,30 @@ def main():
         print(f"  races.json lists SIG markets that SIG no longer shows: {gone}")
 
     if not args.no_kalshi:
+        events = [e for e in kalshi_events() if RACE_TITLE.match(e["title"].strip())]
         used_kalshi = {o["kalshi_id"] for v in races.values() for o in v["outcomes"].values() if o.get("kalshi_id")}
-        whole, extra = [], []
-        for e in kalshi_events():
-            if not is_2026_politics(e["event_ticker"]):
-                continue
-            missing = [m for m in e["markets"] if m["ticker"] not in used_kalshi]
-            if len(missing) == len(e["markets"]):
-                whole.append((e["event_ticker"], e["title"]))
-            else:
-                extra += [(m["ticker"], m["yes_sub_title"], f"{m['yes_bid_dollars']}-{m['yes_ask_dollars']}") for m in missing]
-        print(f"\nKalshi events with no market in races.json (no SIG counterpart, so nothing to trade): {len(whole)}")
-        print_table(("event", "title"), whole)
+        by_title = defaultdict(list)
+        for e in events:
+            by_title[e["title"].strip()].append(e["event_ticker"])
+
+        fixable = [(k, c, ", ".join(by_title[expected_title(v)]))
+                   for k, v in races.items() if expected_title(v) in by_title
+                   for c, o in v["outcomes"].items() if not o.get("kalshi_id")]
+        print(f"\nOutcomes with no Kalshi id although Kalshi has an event with that title (fill these in): {len(fixable)}")
+        print_table(("race", "outcome", "kalshi event(s)"), fixable)
+
+        tracked_titles = {expected_title(v) for v in races.values()}
+        untracked = [e for e in events if e["title"].strip() not in tracked_titles and
+                     not any(m["ticker"] in used_kalshi for m in e["markets"])]
+        by_kind = defaultdict(list)
+        for e in untracked:
+            by_kind[RACE_TITLE.match(e["title"].strip()).group(2)].append(e["event_ticker"])
+        print(f"\nKalshi race events with no race in races.json (SIG has no market for them, so nothing to trade): {len(untracked)}")
+        for kind, tickers in by_kind.items():
+            print(f"  {kind}: {len(tickers)}" + (f"  {', '.join(sorted(tickers))}" if kind != "House" else ""))
+        extra = [(m["ticker"], m["yes_sub_title"], f"{m['yes_bid_dollars']}-{m['yes_ask_dollars']}")
+                 for e in events for m in e["markets"]
+                 if m["ticker"] not in used_kalshi and any(x["ticker"] in used_kalshi for x in e["markets"])]
         print(f"\nKalshi candidate markets inside tracked events that races.json does not list: {len(extra)}")
         print_table(("ticker", "candidate", "bid-ask"), extra)
 

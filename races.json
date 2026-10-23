@@ -2307,11 +2307,11 @@
     "group": "Senate",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXSENATELA-26NOV-D",
         "poly_id": "634878"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXSENATELA-26NOV-R",
         "poly_id": "634879"
       }
     },
@@ -2324,19 +2324,18 @@
         "market_id": "269",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "AL-02-HOUSE": {
     "name": "AL-02 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-AL02-26-D",
         "poly_id": "1280801"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-AL02-26-R",
         "poly_id": "1280800"
       }
     },
@@ -2349,19 +2348,18 @@
         "market_id": "319",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "CA-48-HOUSE": {
     "name": "CA-48 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-CA48-26-D",
         "poly_id": "1282825"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-CA48-26-R",
         "poly_id": "1282824"
       }
     },
@@ -2374,19 +2372,18 @@
         "market_id": "204",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "CO-04-HOUSE": {
     "name": "CO-04 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-CO04-26-D",
         "poly_id": "1282881"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-CO04-26-R",
         "poly_id": "1282880"
       }
     },
@@ -2399,19 +2396,18 @@
         "market_id": "208",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "FL-07-HOUSE": {
     "name": "FL-07 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL07-26-D",
         "poly_id": "1283001"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL07-26-R",
         "poly_id": "1283000"
       }
     },
@@ -2424,19 +2420,18 @@
         "market_id": "321",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "FL-09-HOUSE": {
     "name": "FL-09 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL09-26-D",
         "poly_id": "1283017"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL09-26-R",
         "poly_id": "1283016"
       }
     },
@@ -2449,19 +2444,18 @@
         "market_id": "322",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "FL-16-HOUSE": {
     "name": "FL-16 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL16-26-D",
         "poly_id": "1283065"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL16-26-R",
         "poly_id": "1283064"
       }
     },
@@ -2474,19 +2468,18 @@
         "market_id": "325",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "FL-20-HOUSE": {
     "name": "FL-20 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL20-26-D",
         "poly_id": "1283097"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL20-26-R",
         "poly_id": "1283096"
       }
     },
@@ -2499,19 +2492,18 @@
         "market_id": "327",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "FL-22-HOUSE": {
     "name": "FL-22 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL22-26-D",
         "poly_id": "1283113"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-FL22-26-R",
         "poly_id": "1283112"
       }
     },
@@ -2524,19 +2516,18 @@
         "market_id": "329",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "IA-02-HOUSE": {
     "name": "IA-02 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-IA02-26-D",
         "poly_id": "1283289"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-IA02-26-R",
         "poly_id": "1283288"
       }
     },
@@ -2549,19 +2540,18 @@
         "market_id": "216",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "KY-04-HOUSE": {
     "name": "KY-04 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-KY04-26-D",
         "poly_id": "1283569"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-KY04-26-R",
         "poly_id": "1283568"
       }
     },
@@ -2574,19 +2564,18 @@
         "market_id": "220",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "MN-01-HOUSE": {
     "name": "MN-01 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-MN01-26-D",
         "poly_id": "1283849"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-MN01-26-R",
         "poly_id": "1283848"
       }
     },
@@ -2599,20 +2588,23 @@
         "market_id": "335",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "MN-05-HOUSE": {
     "name": "MN-05 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-MN05-26-D",
         "poly_id": "1283873"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-MN05-26-R",
         "poly_id": "1283872"
+      },
+      "X": {
+        "poly_id": null,
+        "kalshi_id": "KXHOUSERACE-MN05-26-DJAC"
       }
     },
     "contracts": [
@@ -2625,18 +2617,18 @@
         "pays_if": "R"
       }
     ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
   },
   "NY-13-HOUSE": {
     "name": "NY-13 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-NY13-26-D",
         "poly_id": "1284299"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-NY13-26-R",
         "poly_id": "1284298"
       }
     },
@@ -2649,19 +2641,18 @@
         "market_id": "230",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "SC-01-HOUSE": {
     "name": "SC-01 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-SC01-26-D",
         "poly_id": "1284672"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-SC01-26-R",
         "poly_id": "1284671"
       }
     },
@@ -2674,19 +2665,18 @@
         "market_id": "242",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "TN-05-HOUSE": {
     "name": "TN-05 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-TN05-26-D",
         "poly_id": "1284768"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-TN05-26-R",
         "poly_id": "1284767"
       }
     },
@@ -2699,19 +2689,18 @@
         "market_id": "341",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "TX-23-HOUSE": {
     "name": "TX-23 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-TX23-26-D",
         "poly_id": "1284960"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-TX23-26-R",
         "poly_id": "1284959"
       }
     },
@@ -2724,19 +2713,18 @@
         "market_id": "246",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "VA-05-HOUSE": {
     "name": "VA-05 House",
     "group": "House",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-VA05-26-D",
         "poly_id": "1285080"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "KXHOUSERACE-VA05-26-R",
         "poly_id": "1285079"
       }
     },
@@ -2749,8 +2737,7 @@
         "market_id": "345",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "AK-GOV": {
     "name": "Alaska Governor",
@@ -2776,7 +2763,7 @@
       }
     ],
     "enabled": false,
-    "disabled_reason": "Kalshi has no open Alaska governor event.",
+    "disabled_reason": "Kalshi (KXGOVAK-26) and Polymarket list the Alaska governor race by named candidates, not by party, and the race is a multi-candidate primary-style field, so there is no party contract to match SIG's D and R.",
     "poly_note": "Polymarket (alaska-governor-election-winner) lists candidates by name, not parties; poly_id left null."
   },
   "KS-GOV": {
@@ -2784,11 +2771,11 @@
     "group": "Governor",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "GOVPARTYKS-27-D",
         "poly_id": "629412"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "GOVPARTYKS-27-R",
         "poly_id": "629413"
       }
     },
@@ -2801,19 +2788,18 @@
         "market_id": "304",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "NH-GOV": {
     "name": "New Hampshire Governor",
     "group": "Governor",
     "outcomes": {
       "D": {
-        "kalshi_id": null,
+        "kalshi_id": "GOVPARTYNH-28-D",
         "poly_id": "629518"
       },
       "R": {
-        "kalshi_id": null,
+        "kalshi_id": "GOVPARTYNH-28-R",
         "poly_id": "629519"
       }
     },
@@ -2826,8 +2812,7 @@
         "market_id": "373",
         "pays_if": "R"
       }
-    ],
-    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
+    ]
   },
   "RI-GOV": {
     "name": "Rhode Island Governor",
