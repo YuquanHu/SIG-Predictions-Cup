@@ -11,6 +11,7 @@ EPS = 1e-9  # tolerance for float comparisons against the cent-based limits
 class Fair:
     value: float | None  # None: no fair value, and `note` says why
     note: str
+    sources: int = 0     # how many of Kalshi and Polymarket the value is built from
 
 
 @dataclass
@@ -24,6 +25,7 @@ class Opportunity:
     fair: float        # fair probability that this side wins
     size: float | None  # shares available at `price`
     wins_when: str     # outcome whose win makes this bet pay; equivalent bets share it
+    sources: int = 2   # how many price sources the fair value rests on; one source gets a smaller race cap
     decision: str | None = None
 
     @property
@@ -68,7 +70,7 @@ def fair_value(outcome, now):
         return Fair(None, f"no usable source: {'; '.join(dropped)}")
     if len(mids) == 2 and abs(mids["Kalshi"] - mids["Poly"]) > config.MAX_DISAGREE + EPS:
         return Fair(None, f"sources disagree by {abs(mids['Kalshi'] - mids['Poly']):.3f}: {used}")
-    return Fair(sum(mids.values()) / len(mids), f"{used}{drop_note}")
+    return Fair(sum(mids.values()) / len(mids), f"{used}{drop_note}", len(mids))
 
 
 def compute_fair_values(races, now):
@@ -90,7 +92,8 @@ def find_opportunities(races, fair_values):
     found = []
     for race_id, race in races.items():
         for contract in race["contracts"]:
-            fair = fair_values[(race_id, contract["pays_if"])].value
+            fv = fair_values[(race_id, contract["pays_if"])]
+            fair = fv.value
             if fair is None:
                 continue
             yes = contract["yes"]
@@ -100,7 +103,7 @@ def find_opportunities(races, fair_values):
                 if price is not None and 0 < price < 1:
                     found.append(Opportunity(race_id, contract["market_id"], contract["pays_if"], side,
                                              price, win_prob, size,
-                                             wins_when(race, contract["pays_if"], side)))
+                                             wins_when(race, contract["pays_if"], side), fv.sources))
     return found
 
 
@@ -138,3 +141,14 @@ def keep_top(candidates, n):
     for rank, c in enumerate(eligible, start=1):
         c.decision = "TRADE" if rank <= n else f"outside the top {n} by Kelly"
     return eligible[:n]
+
+
+def probability_gaps(races, fair_values, tolerance=0.05):
+    """[(race_id, total)] for races whose outcome fair values do not add up to about 1: a sign that a
+    candidate is missing from races.json (or that a price is off). Skips races with an outcome lacking a fair value."""
+    gaps = []
+    for race_id, race in races.items():
+        values = [fair_values[(race_id, code)].value for code in race["outcomes"]]
+        if None not in values and abs(sum(values) - 1) > tolerance:
+            gaps.append((race_id, sum(values)))
+    return gaps

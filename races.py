@@ -5,6 +5,8 @@ failed fetch leaves None instead of a stale price.
 """
 import json
 
+import config
+
 EXTERNAL_SOURCES = ("kalshi", "poly")  # the sources fair value is built from
 
 
@@ -19,6 +21,13 @@ def clear_quote(q):
 def quote_available(q):
     """A usable quote has both sides; a midpoint needs a bid and an ask."""
     return q["bid"] is not None and q["ask"] is not None
+
+
+def fill_missing_bid(q):
+    """A long-shot with an ask but no bid at all is a real quote worth about half the ask, not 'no data'.
+    Only applied when the ask is within MAX_SPREAD, so the usual spread rule still decides if it is usable."""
+    if q["bid"] is None and q["ask"] is not None and q["ask"] <= config.MAX_SPREAD:
+        q["bid"] = 0.0
 
 
 _warnings = []

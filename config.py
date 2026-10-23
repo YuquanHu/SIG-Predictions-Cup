@@ -39,6 +39,7 @@ TOP_N = 4            # trades kept, ranked by Kelly
 # Sizing and swaps
 INVEST_CAP = 0.80       # at most this share of the bankroll invested
 RACE_CAP = 0.30         # at most this share of the bankroll in one race
+SINGLE_SOURCE_RACE_CAP = 0.15  # the cap when the race's fair value rests on only one price source
 SWAP_MARGIN = 0.01      # a new bet must beat the worst held one by this much expected return
 MIN_ORDER_VALUE = 10.0  # ignore buys smaller than this; "no investable cash" means less than this
 

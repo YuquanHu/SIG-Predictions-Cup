@@ -21,7 +21,7 @@ from portfolio import build_portfolio
 from races import disabled_races, drain_warnings, load_races
 from safety import RunState, check_loss, check_stop, stop_file_exists
 from planner import depth_targets, make_plan
-from strategy import compute_fair_values
+from strategy import compute_fair_values, probability_gaps
 
 
 def run_loop(loop_no, races, state, regime):
@@ -37,7 +37,10 @@ def run_loop(loop_no, races, state, regime):
 
     fetch_all(races)
     fair_values = compute_fair_values(races, time.time())
-    cash, positions = sig.fetch_account()["balance"], sig.fetch_positions()
+    for race_id, total in probability_gaps(races, fair_values):
+        print(f"  WARNING [{race_id}] outcome probabilities add up to {total:.2f}, not 1: is a candidate missing?")
+    cash = sig.fetch_account()["balance"]
+    positions = sig.fetch_positions()
     portfolio = build_portfolio(cash, positions, races, fair_values)
     reason = check_loss(state, portfolio.bankroll)
     if reason:

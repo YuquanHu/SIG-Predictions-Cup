@@ -4,7 +4,7 @@ import time
 import requests
 
 import config
-from races import clear_quote, iter_outcomes, quote_available, warn
+from races import clear_quote, fill_missing_bid, iter_outcomes, quote_available, warn
 
 NAME = "Kalshi"
 
@@ -28,7 +28,10 @@ def fetch_prices(races):
     outcomes = {}  # ticker -> (race_id, code, outcome)
     for race_id, code, o in iter_outcomes(races):
         clear_quote(o["kalshi"])
-        outcomes[o["kalshi_id"]] = (race_id, code, o)
+        if o["kalshi_id"]:  # outcomes with no Kalshi market are skipped without a warning
+            outcomes[o["kalshi_id"]] = (race_id, code, o)
+    if not outcomes:
+        return
     try:
         resp = requests.get(
             f"{config.KALSHI_BASE}/markets",
@@ -55,5 +58,6 @@ def fetch_prices(races):
             ask_size=_size(m.get("yes_ask_size_fp")),
             updated=now,
         )
+        fill_missing_bid(o["kalshi"])
         if not quote_available(o["kalshi"]):
             warn(race_id, NAME, f"{code} ({ticker}): no two-sided quote")

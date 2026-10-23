@@ -23,7 +23,8 @@ def compute_wants(chosen, portfolio):
     for c in chosen:
         target = c.half_kelly * scale * portfolio.bankroll
         held = portfolio.held_in_bet(c.race, c.wins_when)
-        race_room = config.RACE_CAP * portfolio.bankroll - portfolio.held_in_race(c.race)
+        cap = config.RACE_CAP if c.sources >= 2 else config.SINGLE_SOURCE_RACE_CAP
+        race_room = cap * portfolio.bankroll - portfolio.held_in_race(c.race)
         wants.append(Want(c, target, held, max(0.0, min(target - held, race_room))))
     return wants
 

@@ -891,6 +891,10 @@
       "R": {
         "kalshi_id": "HOUSEIA1-26-R",
         "poly_id": "942432"
+      },
+      "X": {
+        "kalshi_id": "HOUSEIA1-26-I",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -902,7 +906,8 @@
         "market_id": "214",
         "pays_if": "R"
       }
-    ]
+    ],
+    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
   },
   "IA-03-HOUSE": {
     "name": "IA-03 House",
@@ -1780,6 +1785,10 @@
       "R": {
         "kalshi_id": "GOVPARTYME-26-R",
         "poly_id": "629426"
+      },
+      "X": {
+        "kalshi_id": "GOVPARTYME-26-RBEN",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -1791,7 +1800,8 @@
         "market_id": "177",
         "pays_if": "R"
       }
-    ]
+    ],
+    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
   },
   "MI-GOV": {
     "name": "Michigan Governor",
@@ -1804,6 +1814,10 @@
       "R": {
         "kalshi_id": "GOVPARTYMI-26-R",
         "poly_id": "629465"
+      },
+      "X": {
+        "kalshi_id": "GOVPARTYMI-26-MD",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -1815,7 +1829,8 @@
         "market_id": "306",
         "pays_if": "R"
       }
-    ]
+    ],
+    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
   },
   "MN-GOV": {
     "name": "Minnesota Governor",
@@ -2240,6 +2255,10 @@
       "R": {
         "kalshi_id": "SENATEID-26-R",
         "poly_id": "630706"
+      },
+      "X": {
+        "kalshi_id": "SENATEID-26-TACH",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -2252,8 +2271,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has a third candidate market (SENATEID-26-TACH, Todd Achilles, about 5-6c) with no SIG contract, so Dem Yes and Rep No are not the same bet."
+    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
   },
   "SD-SEN": {
     "name": "South Dakota Senate",
@@ -2266,6 +2284,10 @@
       "R": {
         "kalshi_id": "SENATESD-26-R",
         "poly_id": "630938"
+      },
+      "X": {
+        "kalshi_id": "SENATESD-26-BBEN",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -2278,8 +2300,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has a third candidate market (SENATESD-26-BBEN, Brian Bengs, about 7-8c) with no SIG contract, so Dem Yes and Rep No are not the same bet."
+    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
   },
   "LA-SEN": {
     "name": "Louisiana Senate",
@@ -2304,8 +2325,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no open Louisiana Senate event (SENATELA-26 is Kentucky)."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "AL-02-HOUSE": {
     "name": "AL-02 House",
@@ -2330,8 +2350,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "CA-48-HOUSE": {
     "name": "CA-48 House",
@@ -2356,8 +2375,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "CO-04-HOUSE": {
     "name": "CO-04 House",
@@ -2382,8 +2400,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "FL-07-HOUSE": {
     "name": "FL-07 House",
@@ -2408,8 +2425,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "FL-09-HOUSE": {
     "name": "FL-09 House",
@@ -2434,8 +2450,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "FL-16-HOUSE": {
     "name": "FL-16 House",
@@ -2460,8 +2475,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "FL-20-HOUSE": {
     "name": "FL-20 House",
@@ -2486,8 +2500,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "FL-22-HOUSE": {
     "name": "FL-22 House",
@@ -2512,8 +2525,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "IA-02-HOUSE": {
     "name": "IA-02 House",
@@ -2538,8 +2550,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "KY-04-HOUSE": {
     "name": "KY-04 House",
@@ -2564,8 +2575,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "MN-01-HOUSE": {
     "name": "MN-01 House",
@@ -2590,8 +2600,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "MN-05-HOUSE": {
     "name": "MN-05 House",
@@ -2616,8 +2625,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "NY-13-HOUSE": {
     "name": "NY-13 House",
@@ -2642,8 +2650,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "SC-01-HOUSE": {
     "name": "SC-01 House",
@@ -2668,8 +2675,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "TN-05-HOUSE": {
     "name": "TN-05 House",
@@ -2694,8 +2700,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "TX-23-HOUSE": {
     "name": "TX-23 House",
@@ -2720,8 +2725,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "VA-05-HOUSE": {
     "name": "VA-05 House",
@@ -2746,8 +2750,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no House market for this district."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "AK-GOV": {
     "name": "Alaska Governor",
@@ -2799,8 +2802,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no open Kansas governor event."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "NH-GOV": {
     "name": "New Hampshire Governor",
@@ -2825,8 +2827,7 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has no open New Hampshire governor event."
+    "note": "No Kalshi market: fair value comes from Polymarket alone, so this race uses the single-source cap."
   },
   "RI-GOV": {
     "name": "Rhode Island Governor",
@@ -2873,6 +2874,10 @@
       "R": {
         "kalshi_id": "GOVPARTYTN-26-R",
         "poly_id": "629667"
+      },
+      "X": {
+        "kalshi_id": "GOVPARTYTN-26-DHAT",
+        "poly_id": null
       }
     },
     "contracts": [
@@ -2885,7 +2890,6 @@
         "pays_if": "R"
       }
     ],
-    "enabled": false,
-    "disabled_reason": "Kalshi has a third candidate market (GOVPARTYTN-26-DHAT, David Hatley, about 3c) with no SIG contract, so Dem Yes and Rep No are not the same bet."
+    "note": "Outcome X is the other candidate on Kalshi; SIG has no contract for it."
   }
 }

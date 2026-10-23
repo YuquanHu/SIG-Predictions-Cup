@@ -5,7 +5,7 @@ import time
 import requests
 
 import config
-from races import clear_quote, iter_outcomes, quote_available, warn
+from races import clear_quote, fill_missing_bid, iter_outcomes, quote_available, warn
 
 NAME = "Polymarket"
 CHUNK = 50  # Gamma rejects a request for ~180 ids (HTTP 422), so ids and tokens go in chunks of this size
@@ -114,6 +114,7 @@ def fetch_prices(races):
             ask_size=float(best_ask["size"]) if best_ask else None,
             updated=now,
         )
+        fill_missing_bid(o["poly"])
         if not quote_available(o["poly"]):
             warn(race_id, NAME, f"{code} ({o['poly_id']}): no two-sided quote")
     for token, (race_id, code, o) in outcomes.items():
