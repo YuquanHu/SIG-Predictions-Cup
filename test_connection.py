@@ -43,6 +43,7 @@ def show_prices():
         race["contracts"] = [c for c in race["contracts"] if c["market_id"] in TEST_MARKETS]
     sig.setup(races)
     sig.fetch_prices(races)
+    sig.fetch_depth(races, TEST_MARKETS)  # bulk prices carry no sizes
     for _, c in iter_contracts(races):
         print(f"  market {c['market_id']} (pays if {c['pays_if']}): {c['title'] or '?'}")
         print_quote("YES", c["yes"])

@@ -11,7 +11,7 @@ COLUMNS = {
     "orders": ["time", "loop", "action", "race", "market", "side", "price", "fair", "edge", "shares",
                "value", "reason", "dry_run"],
     "errors": ["time", "loop", "where", "error"],
-    "loops": ["time", "loop", "regime", "cash", "invested", "bankroll", "opportunities", "orders", "status"],
+    "loops": ["time", "loop", "regime", "cash", "invested", "bankroll", "opportunities", "orders", "sig_reads", "seconds", "status"],
 }
 
 
@@ -21,6 +21,10 @@ def log(kind, loop_no, rows):
         return
     os.makedirs(config.LOG_DIR, exist_ok=True)
     path = os.path.join(config.LOG_DIR, f"{kind}.csv")
+    if os.path.exists(path):
+        with open(path, newline="") as f:
+            if next(csv.reader(f), None) != COLUMNS[kind]:  # columns changed: keep the old file, start a new one
+                os.rename(path, path.replace(".csv", f".old-{int(time.time())}.csv"))
     is_new = not os.path.exists(path)
     stamp = time.strftime("%Y-%m-%d %H:%M:%S")
     with open(path, "a", newline="") as f:

@@ -9,6 +9,7 @@ import config
 @dataclass
 class RunState:
     errors_in_row: int = 0
+    orders_may_be_open: bool = True  # cancel-all is only needed after orders went out (and at start-up)
     day: date | None = None
     day_start_equity: float | None = None
 

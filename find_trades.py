@@ -6,6 +6,7 @@
 import time
 
 import config
+import sig
 from display import OPPORTUNITY_COLUMNS, opportunity_cells, print_table
 from feeds import fetch_all, setup_all
 from races import load_races
@@ -18,6 +19,9 @@ def main():
     fetch_all(races)
 
     fair_values = compute_fair_values(races, time.time())
+    candidates = find_opportunities(races, fair_values)
+    chosen = keep_top(candidates, config.TOP_N)
+    sig.fetch_depth(races, {c.market_id for c in chosen})  # sizes for the trades it would make
     candidates = find_opportunities(races, fair_values)
     chosen = keep_top(candidates, config.TOP_N)
 

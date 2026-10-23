@@ -1,5 +1,10 @@
-"""SIG Super Market API: read-only market lookup and orderbook prices."""
+"""SIG Super Market API: read-only market lookup, bulk prices, and order-book depth.
+
+SIG allows 100 reads a minute per account. Bulk calls cover up to 100 markets per read, and every read goes
+through a sliding-window budget guard so the bot slows down instead of being locked out.
+"""
 import time
+from collections import deque
 
 import requests
 
@@ -7,21 +12,56 @@ import config
 from races import clear_quote, iter_contracts, warn
 
 NAME = "SIG"
+BULK = 100  # most ids SIG accepts per bulk call
+
+_read_times = deque()  # when each recent read was sent, for the per-minute budget
+_reads_counted = 0     # reads since take_read_count() was last called
 
 
 class SigError(Exception):
     pass
 
 
+def take_read_count():
+    """SIG reads made since the last call (for logging reads per loop)."""
+    global _reads_counted
+    count, _reads_counted = _reads_counted, 0
+    return count
+
+
+def _wait_for_budget():
+    """Sleep until one more read fits under SIG_READS_PER_MINUTE, then record it."""
+    global _reads_counted
+    while True:
+        now = time.time()
+        while _read_times and now - _read_times[0] >= 60:
+            _read_times.popleft()
+        if len(_read_times) < config.SIG_READS_PER_MINUTE:
+            break
+        pause = 60 - (now - _read_times[0]) + 0.05
+        print(f"  (SIG read budget used up: waiting {pause:.0f}s)")
+        time.sleep(pause)
+    _read_times.append(time.time())
+    _reads_counted += 1
+
+
 def _get(path, **params):
     if config.SIG_TOURNAMENT_ID:
         params["tournamentId"] = config.SIG_TOURNAMENT_ID
-    resp = requests.get(
-        config.SIG_BASE + path,
-        params=params,
-        headers={"Authorization": f"Bearer {config.SIG_API_KEY}"},
-        timeout=config.HTTP_TIMEOUT,
-    )
+    for attempt in range(2):
+        _wait_for_budget()
+        resp = requests.get(
+            config.SIG_BASE + path,
+            params=params,
+            headers={"Authorization": f"Bearer {config.SIG_API_KEY}"},
+            timeout=config.HTTP_TIMEOUT,
+        )
+        if resp.status_code == 429 and attempt == 0:  # rate limited despite the guard: wait as told, retry once
+            wait = float(resp.headers.get("Retry-After", 60))
+            print(f"  (SIG answered 429; waiting {wait:.0f}s as asked)")
+            time.sleep(wait)
+            continue
+        break
     if not resp.ok:
         try:
             err = resp.json()["error"]
@@ -32,39 +72,83 @@ def _get(path, **params):
     return resp.json()
 
 
-def _resolve(contract):
-    """Resolve a SIG market id to its YES exchange id (binary markets have one exchange)."""
-    market = _get(f"/markets/{contract['market_id']}")
-    exchanges = market["exchanges"]
-    yes = next((e for e in exchanges if (e.get("option") or "").upper() == "YES"), exchanges[0])
-    contract["sig_exchange_id"] = yes["id"]
-    contract["title"] = market["title"]
+def _chunks(items):
+    items = list(items)
+    return [items[i:i + BULK] for i in range(0, len(items), BULK)]
+
+
+def _resolve_all(pairs):
+    """Look up the YES exchange id and title of each (race_id, contract) with one read per BULK markets."""
+    by_market = {c["market_id"]: (race_id, c) for race_id, c in pairs}
+    returned, failed = {}, set()
+    for chunk in _chunks(by_market):
+        try:
+            data = _get("/markets", ids=",".join(chunk), limit=len(chunk))["data"]
+        except Exception as e:  # only this chunk's races lose SIG
+            failed.update(chunk)
+            for market_id in chunk:
+                warn(by_market[market_id][0], NAME, f"market {market_id} lookup failed: {e}")
+            continue
+        returned.update({m["id"]: m for m in data})
+    for market_id, (race_id, c) in by_market.items():
+        market = returned.get(market_id)
+        if market is None:
+            if market_id not in failed:
+                warn(race_id, NAME, f"market {market_id} not returned by SIG")
+            continue
+        yes = next((e for e in market["exchanges"] if (e.get("option") or "").upper() == "YES"),
+                   market["exchanges"][0])
+        c["sig_exchange_id"] = yes["id"]
+        c["title"] = market["title"]
 
 
 def setup(races):
-    for race_id, c in iter_contracts(races):
-        try:
-            _resolve(c)
-        except Exception as e:  # a bad market must not stop the other races
-            warn(race_id, NAME, f"market {c['market_id']} lookup failed: {e}")
+    _resolve_all(list(iter_contracts(races)))
 
 
 def fetch_prices(races):
-    """Best YES bid/ask with sizes for every SIG contract, one orderbook read each."""
-    for race_id, c in iter_contracts(races):
+    """Best YES bid and ask for every contract, one read per BULK contracts. Sizes are not available here
+    (they stay None); fetch_depth supplies them for the contracts that are about to trade."""
+    pairs = list(iter_contracts(races))
+    for _, c in pairs:
         clear_quote(c["yes"])
+    _resolve_all([(r, c) for r, c in pairs if c["sig_exchange_id"] is None])  # retry earlier lookup failures
+    by_exchange = {c["sig_exchange_id"]: (r, c) for r, c in pairs if c["sig_exchange_id"]}
+    now = time.time()
+    for chunk in _chunks(by_exchange):
         try:
-            if c["sig_exchange_id"] is None:  # setup failed earlier; retry it
-                _resolve(c)
+            data = _get("/exchanges/prices", ids=",".join(chunk))
+        except Exception as e:
+            for exchange_id in chunk:
+                race_id, c = by_exchange[exchange_id]
+                warn(race_id, NAME, f"market {c['market_id']}: {e}")
+            continue
+        for row in data["data"]:
+            race_id, c = by_exchange[row["exchangeId"]]
+            c["yes"].update(bid=row["bestBid"], ask=row["bestAsk"], updated=now)
+            if row["bestBid"] is None and row["bestAsk"] is None:
+                warn(race_id, NAME, f"market {c['market_id']} has an empty orderbook")
+        for exchange_id in data.get("missingIds", []):
+            race_id, c = by_exchange[exchange_id]
+            warn(race_id, NAME, f"market {c['market_id']}: exchange {exchange_id} not returned")
+
+
+def fetch_depth(races, market_ids):
+    """Best bid and ask with sizes for the given SIG markets, one orderbook read each."""
+    wanted = set(market_ids)
+    for race_id, c in iter_contracts(races):
+        if c["market_id"] not in wanted:
+            continue
+        try:
             book = _get(f"/markets/{c['market_id']}/orderbook", depth=1)
             ex = next((e for e in book["exchanges"] if e["exchangeId"] == c["sig_exchange_id"]), None)
             if ex is None:
                 raise SigError(f"exchange {c['sig_exchange_id']} not in orderbook")
-            best_bid = max(ex["bids"], key=lambda lvl: lvl["price"], default=None)
-            best_ask = min(ex["asks"], key=lambda lvl: lvl["price"], default=None)
-        except Exception as e:
-            warn(race_id, NAME, f"market {c['market_id']}: {e}")
+        except Exception as e:  # keep the bulk quote, but without sizes nothing will trade here
+            warn(race_id, NAME, f"market {c['market_id']} depth: {e}")
             continue
+        best_bid = max(ex["bids"], key=lambda lvl: lvl["price"], default=None)
+        best_ask = min(ex["asks"], key=lambda lvl: lvl["price"], default=None)
         c["yes"].update(
             bid=best_bid["price"] if best_bid else None,
             bid_size=best_bid["quantity"] if best_bid else None,
@@ -72,8 +156,6 @@ def fetch_prices(races):
             ask_size=best_ask["quantity"] if best_ask else None,
             updated=time.time(),
         )
-        if best_bid is None and best_ask is None:
-            warn(race_id, NAME, f"market {c['market_id']} has an empty orderbook")
 
 
 def fetch_account():

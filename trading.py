@@ -28,21 +28,20 @@ def compute_wants(chosen, portfolio):
     return wants
 
 
-def _sell(h, reason):
+def _sell_order(h, reason):
     """Sell what the book will take at the sell price, or nothing when it takes less than one share."""
     shares = math.floor(min(h.shares, h.sell_depth or 0))
     return [Order("sell", h.side, h.race, h.market_id, shares, h.sell_price, h.fair, reason)] if shares else []
 
 
-def decide_sells(portfolio, wants):
-    """Sell any position whose fair value fell below its sell price. When no investable cash is left,
-    also sell the worst held position for a new bet that beats it by SWAP_MARGIN."""
-    sells, exiting = [], [h for h in portfolio.holdings if h.negative_edge]
-    for h in exiting:
-        sells += _sell(h, f"exit: fair {h.fair:.3f} is below sell price {h.sell_price:.3f}")
+def sell_decisions(portfolio, wants):
+    """[(holding, reason)] to sell: any position whose fair value fell below its sell price; and, when no
+    investable cash is left, the worst held position for a new bet that beats it by SWAP_MARGIN."""
+    exiting = [h for h in portfolio.holdings if h.negative_edge]
+    decisions = [(h, f"exit: fair {h.fair:.3f} is below sell price {h.sell_price:.3f}") for h in exiting]
 
     if portfolio.investable >= config.MIN_ORDER_VALUE:
-        return sells
+        return decisions
     worst_first = sorted((h for h in portfolio.holdings if h.exp_return is not None and h not in exiting),
                          key=lambda h: h.exp_return)
     for w in wants:
@@ -52,9 +51,17 @@ def decide_sells(portfolio, wants):
         if rivals and w.opp.expected_return - rivals[0].exp_return >= config.SWAP_MARGIN - EPS:
             worst = rivals[0]
             worst_first.remove(worst)
-            sells += _sell(worst, f"swap: {w.opp.race} {w.opp.side.upper()} {w.opp.market_id} returns "
-                                  f"{w.opp.expected_return:.1%} vs {worst.exp_return:.1%} held")
-    return sells
+            decisions.append((worst, f"swap: {w.opp.race} {w.opp.side.upper()} {w.opp.market_id} returns "
+                                     f"{w.opp.expected_return:.1%} vs {worst.exp_return:.1%} held"))
+    return decisions
+
+
+def sell_orders(decisions):
+    return [order for h, reason in decisions for order in _sell_order(h, reason)]
+
+
+def decide_sells(portfolio, wants):
+    return sell_orders(sell_decisions(portfolio, wants))
 
 
 def size_buys(wants, investable):

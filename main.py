@@ -20,42 +20,52 @@ from feeds import fetch_all, setup_all
 from portfolio import build_portfolio
 from races import disabled_races, drain_warnings, load_races
 from safety import RunState, check_loss, check_stop, stop_file_exists
-from strategy import compute_fair_values, find_opportunities, keep_top
-from trading import compute_wants, decide_sells, size_buys
+from planner import depth_targets, make_plan
+from strategy import compute_fair_values
 
 
 def run_loop(loop_no, races, state, regime):
     """One pass. Returns the reason trading must stop, else None."""
-    orders.cancel_all()
+    started = time.time()
+    sig.take_read_count()
+    if state.orders_may_be_open:
+        orders.cancel_all()
+        state.orders_may_be_open = False
     reason = check_stop(state)
     if reason:
         return reason
 
     fetch_all(races)
     fair_values = compute_fair_values(races, time.time())
-    portfolio = build_portfolio(sig.fetch_account()["balance"], sig.fetch_positions(), races, fair_values)
+    cash, positions = sig.fetch_account()["balance"], sig.fetch_positions()
+    portfolio = build_portfolio(cash, positions, races, fair_values)
     reason = check_loss(state, portfolio.bankroll)
     if reason:
         return reason
 
-    candidates = find_opportunities(races, fair_values)
-    chosen = keep_top(candidates, config.TOP_N)
-    wants = compute_wants(chosen, portfolio)
-    buys, notes = size_buys(wants, portfolio.investable)
-    to_place = decide_sells(portfolio, wants) + buys
+    plan = make_plan(races, fair_values, portfolio)                    # screen every race on bulk prices
+    targets = depth_targets(plan, config.MAX_DEPTH_READS_PER_LOOP)
+    if targets:                                                        # real sizes and fresh prices where money moves
+        sig.fetch_depth(races, targets)
+        portfolio = build_portfolio(cash, positions, races, fair_values)
+        plan = make_plan(races, fair_values, portfolio)
 
-    print_report(portfolio, chosen, [o for o in to_place if o.action == "sell"], notes)
+    print_report(portfolio, plan.chosen, plan.sells, plan.notes)
+    state.orders_may_be_open = bool(plan.orders)  # set before placing: a failure midway must still trigger a cancel
     print("\nOrders")
-    for order in to_place:
+    for order in plan.orders:
         orders.place_order(order, regime.order_timeout)
-    if not to_place:
+    if not plan.orders:
         print("  none")
 
-    logbook.log("opportunities", loop_no, [logbook.opportunity_row(c) for c in candidates])
-    logbook.log("orders", loop_no, [logbook.order_row(o) for o in to_place])
+    reads, seconds = sig.take_read_count(), time.time() - started
+    print(f"\nloop took {seconds:.1f}s, {reads} SIG reads ({len(targets)} depth reads)")
+    logbook.log("opportunities", loop_no, [logbook.opportunity_row(c) for c in plan.candidates])
+    logbook.log("orders", loop_no, [logbook.order_row(o) for o in plan.orders])
     logbook.log("loops", loop_no, [{"regime": config.REGIME, "cash": portfolio.cash, "invested": portfolio.invested,
-                                    "bankroll": portfolio.bankroll, "opportunities": len(chosen),
-                                    "orders": len(to_place), "status": "ok"}])
+                                    "bankroll": portfolio.bankroll, "opportunities": len(plan.chosen),
+                                    "orders": len(plan.orders), "sig_reads": reads, "seconds": round(seconds, 1),
+                                    "status": "ok"}])
     return None
 
 
