@@ -22,9 +22,9 @@ RACES_FILE = os.path.join(RACES_DIR, "races.json")
 
 Regime = namedtuple("Regime", "order_timeout loop_pause")  # seconds
 REGIMES = {
-    "slow": Regime(20, 60),      # overnight US time, weekends, nothing happening
+    "slow": Regime(30, 60),      # overnight US time, weekends, nothing happening
     "normal": Regime(10, 20),    # most days, polls and news coming out
-    "election": Regime(2, 3),    # results coming in, prices moving fast
+    "election": Regime(3, 5),    # results coming in, prices moving fast
 }
 REGIME = "normal"  # slow | normal | election
 DRY_RUN = True
