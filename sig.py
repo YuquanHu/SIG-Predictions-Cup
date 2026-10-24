@@ -4,18 +4,16 @@ SIG allows 100 reads a minute per account. Bulk calls cover up to 100 markets pe
 through a sliding-window budget guard so the bot slows down instead of being locked out.
 """
 import time
-from collections import deque
 
 import requests
 
+import budget
 import config
+from parallel import run_all
 from races import clear_quote, iter_contracts, warn
 
 NAME = "SIG"
 BULK = 100  # most ids SIG accepts per bulk call
-
-_read_times = deque()  # when each recent read was sent, for the per-minute budget
-_reads_counted = 0     # reads since take_read_count() was last called
 
 
 class SigError(Exception):
@@ -24,32 +22,14 @@ class SigError(Exception):
 
 def take_read_count():
     """SIG reads made since the last call (for logging reads per loop)."""
-    global _reads_counted
-    count, _reads_counted = _reads_counted, 0
-    return count
-
-
-def _wait_for_budget():
-    """Sleep until one more read fits under SIG_READS_PER_MINUTE, then record it."""
-    global _reads_counted
-    while True:
-        now = time.time()
-        while _read_times and now - _read_times[0] >= 60:
-            _read_times.popleft()
-        if len(_read_times) < config.SIG_READS_PER_MINUTE:
-            break
-        pause = 60 - (now - _read_times[0]) + 0.05
-        print(f"  (SIG read budget used up: waiting {pause:.0f}s)")
-        time.sleep(pause)
-    _read_times.append(time.time())
-    _reads_counted += 1
+    return budget.READS.take_count()
 
 
 def _get(path, **params):
     if config.SIG_TOURNAMENT_ID:
         params["tournamentId"] = config.SIG_TOURNAMENT_ID
     for attempt in range(2):
-        _wait_for_budget()
+        budget.READS.acquire()
         resp = requests.get(
             config.SIG_BASE + path,
             params=params,
@@ -115,47 +95,52 @@ def fetch_prices(races):
     _resolve_all([(r, c) for r, c in pairs if c["sig_exchange_id"] is None])  # retry earlier lookup failures
     by_exchange = {c["sig_exchange_id"]: (r, c) for r, c in pairs if c["sig_exchange_id"]}
     now = time.time()
-    for chunk in _chunks(by_exchange):
-        try:
-            data = _get("/exchanges/prices", ids=",".join(chunk))
-        except Exception as e:
-            for exchange_id in chunk:
-                race_id, c = by_exchange[exchange_id]
-                warn(race_id, NAME, f"market {c['market_id']}: {e}")
-            continue
-        for row in data["data"]:
-            race_id, c = by_exchange[row["exchangeId"]]
-            c["yes"].update(bid=row["bestBid"], ask=row["bestAsk"], updated=now)
-            if row["bestBid"] is None and row["bestAsk"] is None:
-                warn(race_id, NAME, f"market {c['market_id']} has an empty orderbook")
-        for exchange_id in data.get("missingIds", []):
+    run_all([lambda chunk=chunk: _price_chunk(chunk, by_exchange, now) for chunk in _chunks(by_exchange)])
+
+
+def _price_chunk(chunk, by_exchange, now):
+    try:
+        data = _get("/exchanges/prices", ids=",".join(chunk))
+    except Exception as e:
+        for exchange_id in chunk:
             race_id, c = by_exchange[exchange_id]
-            warn(race_id, NAME, f"market {c['market_id']}: exchange {exchange_id} not returned")
+            warn(race_id, NAME, f"market {c['market_id']}: {e}")
+        return
+    for row in data["data"]:
+        race_id, c = by_exchange[row["exchangeId"]]
+        c["yes"].update(bid=row["bestBid"], ask=row["bestAsk"], updated=now)
+        if row["bestBid"] is None and row["bestAsk"] is None:
+            warn(race_id, NAME, f"market {c['market_id']} has an empty orderbook")
+    for exchange_id in data.get("missingIds", []):
+        race_id, c = by_exchange[exchange_id]
+        warn(race_id, NAME, f"market {c['market_id']}: exchange {exchange_id} not returned")
 
 
 def fetch_depth(races, market_ids):
-    """Best bid and ask with sizes for the given SIG markets, one orderbook read each."""
+    """Best bid and ask with sizes for the given SIG markets, one orderbook read each (run side by side)."""
     wanted = set(market_ids)
-    for race_id, c in iter_contracts(races):
-        if c["market_id"] not in wanted:
-            continue
-        try:
-            book = _get(f"/markets/{c['market_id']}/orderbook", depth=1)
-            ex = next((e for e in book["exchanges"] if e["exchangeId"] == c["sig_exchange_id"]), None)
-            if ex is None:
-                raise SigError(f"exchange {c['sig_exchange_id']} not in orderbook")
-        except Exception as e:  # keep the bulk quote, but without sizes nothing will trade here
-            warn(race_id, NAME, f"market {c['market_id']} depth: {e}")
-            continue
-        best_bid = max(ex["bids"], key=lambda lvl: lvl["price"], default=None)
-        best_ask = min(ex["asks"], key=lambda lvl: lvl["price"], default=None)
-        c["yes"].update(
-            bid=best_bid["price"] if best_bid else None,
-            bid_size=best_bid["quantity"] if best_bid else None,
-            ask=best_ask["price"] if best_ask else None,
-            ask_size=best_ask["quantity"] if best_ask else None,
-            updated=time.time(),
-        )
+    run_all([lambda race_id=race_id, c=c: _read_depth(race_id, c)
+             for race_id, c in iter_contracts(races) if c["market_id"] in wanted])
+
+
+def _read_depth(race_id, c):
+    try:
+        book = _get(f"/markets/{c['market_id']}/orderbook", depth=1)
+        ex = next((e for e in book["exchanges"] if e["exchangeId"] == c["sig_exchange_id"]), None)
+        if ex is None:
+            raise SigError(f"exchange {c['sig_exchange_id']} not in orderbook")
+    except Exception as e:  # keep the bulk quote, but without sizes nothing will trade here
+        warn(race_id, NAME, f"market {c['market_id']} depth: {e}")
+        return
+    best_bid = max(ex["bids"], key=lambda lvl: lvl["price"], default=None)
+    best_ask = min(ex["asks"], key=lambda lvl: lvl["price"], default=None)
+    c["yes"].update(
+        bid=best_bid["price"] if best_bid else None,
+        bid_size=best_bid["quantity"] if best_bid else None,
+        ask=best_ask["price"] if best_ask else None,
+        ask_size=best_ask["quantity"] if best_ask else None,
+        updated=time.time(),
+    )
 
 
 def fetch_account():

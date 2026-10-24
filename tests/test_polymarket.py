@@ -32,7 +32,7 @@ class Chunking(unittest.TestCase):
         with mock.patch("polymarket.requests.get", side_effect=lambda url, params, timeout: gamma_reply(params)) as get:
             polymarket.setup(races)
         sizes = [len([p for p in c.kwargs["params"] if p[0] == "id"]) for c in get.call_args_list]
-        self.assertEqual(sizes, [50, 50, 20])
+        self.assertEqual(sorted(sizes, reverse=True), [50, 50, 20])  # the chunks run side by side, so order varies
         tokens = [o["poly_yes_token"] for o in races["R"]["outcomes"].values() if o["poly_id"]]
         self.assertTrue(all(tokens))
         self.assertEqual(drain_warnings(), [])

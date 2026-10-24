@@ -2,6 +2,7 @@
 import unittest
 from unittest import mock
 
+import budget
 import config
 import sig
 from planner import depth_targets, make_plan
@@ -38,7 +39,7 @@ def prices_reply(url, params, headers, timeout):
 
 class BulkReads(unittest.TestCase):
     def setUp(self):
-        sig._read_times.clear()
+        budget.READS._times.clear()
         sig.take_read_count()
         drain_warnings()
 
@@ -82,7 +83,7 @@ class BulkReads(unittest.TestCase):
 
 class ReadBudget(unittest.TestCase):
     def setUp(self):
-        sig._read_times.clear()
+        budget.READS._times.clear()
 
     def test_the_read_over_the_limit_waits_for_the_window_to_clear(self):
         clock = [1000.0]
@@ -90,8 +91,8 @@ class ReadBudget(unittest.TestCase):
         def sleep(seconds):
             slept.append(seconds)
             clock[0] += seconds
-        with mock.patch.object(config, "SIG_READS_PER_MINUTE", 3), mock.patch("sig.time.time", lambda: clock[0]), \
-                mock.patch("sig.time.sleep", sleep), mock.patch("sig.requests.get", return_value=reply({"ok": 1})):
+        with mock.patch.object(config, "SIG_READS_PER_MINUTE", 3), mock.patch("budget.time.time", lambda: clock[0]), \
+                mock.patch("budget.time.sleep", sleep), mock.patch("sig.requests.get", return_value=reply({"ok": 1})):
             for _ in range(3):
                 sig._get("/x")
             self.assertEqual(slept, [])

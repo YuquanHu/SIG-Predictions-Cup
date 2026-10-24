@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import config
 from strategy import find_opportunities, keep_top
-from trading import compute_wants, sell_decisions, sell_orders, size_buys
+from trading import compute_wants, limit_orders, sell_decisions, sell_orders, size_buys
 
 
 @dataclass
@@ -15,6 +15,7 @@ class Plan:
     sells: list
     buys: list
     notes: list
+    skipped: list  # orders left for the next loop because of MAX_ORDERS_PER_LOOP
 
     @property
     def orders(self):
@@ -27,7 +28,10 @@ def make_plan(races, fair_values, portfolio):
     wants = compute_wants(chosen, portfolio)
     decisions = sell_decisions(portfolio, wants)
     buys, notes = size_buys(wants, portfolio.investable)
-    return Plan(candidates, chosen, wants, decisions, sell_orders(decisions), buys, notes)
+    sells, buys, skipped = limit_orders(sell_orders(decisions), buys, config.MAX_ORDERS_PER_LOOP)
+    notes += [f"{o.race} {o.side.upper()} {o.market_id}: {o.action} x{o.shares:,.0f} skipped "
+              f"(limit of {config.MAX_ORDERS_PER_LOOP} orders per loop)" for o in skipped]
+    return Plan(candidates, chosen, wants, decisions, sells, buys, notes, skipped)
 
 
 def depth_targets(plan, limit):

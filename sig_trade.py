@@ -7,6 +7,7 @@ import uuid
 
 import requests
 
+import budget
 import config
 
 MIN_ORDER_SHARES = 1  # the docs state no minimum; quantity is an integer, so one share is the smallest order
@@ -28,6 +29,8 @@ class Client:
     @staticmethod
     def _send(method, url, path, params, body):
         """One HTTP attempt: print the request, then the response; return (response, parsed json)."""
+        if method != "GET":
+            budget.WRITES.acquire()  # orders and cancels count against SIG's writes-per-minute limit
         print(f"\n>>> {method} {url}" + (f"  params={params}" if params else ""))
         print(">>> Authorization: Bearer ****")
         if body is not None:

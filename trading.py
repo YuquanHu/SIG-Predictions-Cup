@@ -88,3 +88,10 @@ def size_buys(wants, investable):
                           f"edge {o.edge * 100:.1f}c, half Kelly {o.half_kelly:.1%}"))
         notes.append(f"{label}: buy {shares:,} (target {w.target:,.0f}, held {w.held:,.0f}, want {w.want:,.0f})")
     return buys, notes
+
+
+def limit_orders(sells, buys, limit):
+    """At most `limit` orders: sells first (they cut risk), then buys in Kelly order. Returns (sells, buys, skipped)."""
+    kept_sells = sells[:limit]
+    kept_buys = buys[:limit - len(kept_sells)]
+    return kept_sells, kept_buys, sells[len(kept_sells):] + buys[len(kept_buys):]

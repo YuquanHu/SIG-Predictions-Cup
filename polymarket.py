@@ -5,6 +5,7 @@ import time
 import requests
 
 import config
+from parallel import run_all
 from races import clear_quote, fill_missing_bid, iter_outcomes, quote_available, warn
 
 NAME = "Polymarket"
@@ -23,7 +24,8 @@ def setup(races):
         if o["poly_id"]:  # outcomes with no Polymarket match are skipped without a warning
             outcomes[o["poly_id"]] = (race_id, code, o)
     markets, failed = [], set()
-    for chunk in _chunks(outcomes):
+
+    def lookup(chunk):
         try:
             resp = requests.get(
                 f"{config.POLY_GAMMA_BASE}/markets",
@@ -31,12 +33,17 @@ def setup(races):
                 timeout=config.HTTP_TIMEOUT,
             )
             resp.raise_for_status()
-            markets += resp.json()
+            return chunk, resp.json(), None
         except Exception as e:  # only this chunk's races lose Polymarket
+            return chunk, [], e
+
+    for chunk, found, error in run_all([lambda chunk=chunk: lookup(chunk) for chunk in _chunks(outcomes)]):
+        markets += found
+        if error:
             failed.update(chunk)
             for pid in chunk:
                 race_id, code, o = outcomes[pid]
-                warn(race_id, NAME, f"{code} ({pid}): market lookup failed: {e}")
+                warn(race_id, NAME, f"{code} ({pid}): market lookup failed: {error}")
 
     for m in markets:
         entry = outcomes.get(str(m["id"]))
@@ -64,19 +71,27 @@ def _post_books(tokens):
     return resp.json()
 
 
+def _books_for_chunk(chunk):
+    """Books for one chunk of tokens; if the request fails, retry its tokens one at a time so a single bad
+    market only loses itself. Returns (books, errors by token)."""
+    try:
+        return _post_books(chunk), {}
+    except Exception:
+        books, errors = [], {}
+        for t in chunk:
+            try:
+                books += _post_books([t])
+            except Exception as e:
+                errors[t] = e
+        return books, errors
+
+
 def _fetch_books(tokens):
-    """Books for all tokens, one request per CHUNK. If a chunk fails, retry its tokens one at a time
-    so a single bad market only loses itself. Returns (books, errors by token)."""
+    """Books for all tokens, one request per CHUNK, with the chunks requested side by side."""
     books, errors = [], {}
-    for chunk in _chunks(tokens):
-        try:
-            books += _post_books(chunk)
-        except Exception:
-            for t in chunk:
-                try:
-                    books += _post_books([t])
-                except Exception as e:
-                    errors[t] = e
+    for chunk_books, chunk_errors in run_all([lambda chunk=chunk: _books_for_chunk(chunk) for chunk in _chunks(tokens)]):
+        books += chunk_books
+        errors.update(chunk_errors)
     return books, errors
 
 

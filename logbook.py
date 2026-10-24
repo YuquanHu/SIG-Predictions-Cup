@@ -12,7 +12,7 @@ COLUMNS = {
     "orders": ["time", "loop", "action", "race", "market", "side", "price", "fair", "edge", "shares",
                "value", "reason", "dry_run"],
     "errors": ["time", "loop", "where", "error"],
-    "loops": ["time", "loop", "regime", "cash", "invested", "bankroll", "opportunities", "orders", "sig_reads", "seconds", "status"],
+    "loops": ["time", "loop", "regime", "cash", "invested", "bankroll", "opportunities", "orders", "sig_reads", "sig_writes", "seconds", "status"],
 }
 
 

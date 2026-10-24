@@ -53,5 +53,7 @@ LOG_DIR = os.path.join(RACES_DIR, "logs")
 # SIG allows 100 reads a minute per account; stay under it
 SIG_READS_PER_MINUTE = 90
 MAX_DEPTH_READS_PER_LOOP = 6  # order-book reads per loop, for the contracts about to trade
+SIG_WRITES_PER_MINUTE = 25    # SIG allows 30 writes (orders and cancels) a minute; stay under it
+MAX_ORDERS_PER_LOOP = 6       # sells first, then buys in Kelly order; the rest wait for the next loop
 
 HTTP_TIMEOUT = 10  # seconds

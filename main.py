@@ -11,6 +11,7 @@ import argparse
 import time
 import traceback
 
+import budget
 import config
 import logbook
 import orders
@@ -20,6 +21,7 @@ from feeds import fetch_all, setup_all
 from portfolio import build_portfolio
 from races import disabled_races, drain_warnings, load_races
 from safety import RunState, check_loss, check_stop, new_warnings, stop_file_exists
+from parallel import run_all
 from planner import depth_targets, make_plan
 from strategy import EPS, compute_fair_values, probability_gaps
 
@@ -35,12 +37,11 @@ def run_loop(loop_no, races, state, regime):
     if reason:
         return reason
 
-    fetch_all(races)
+    _, account, positions = run_all([lambda: fetch_all(races), sig.fetch_account, sig.fetch_positions])
     fair_values = compute_fair_values(races, time.time())
     for race_id, total in probability_gaps(races, fair_values):
         print(f"  WARNING [{race_id}] outcome probabilities add up to {total:.2f}, not 1: is a candidate missing?")
-    cash = sig.fetch_account()["balance"]
-    positions = sig.fetch_positions()
+    cash = account["balance"]
     portfolio = build_portfolio(cash, positions, races, fair_values)
     reason = check_loss(state, portfolio.bankroll)
     if reason:
@@ -61,15 +62,15 @@ def run_loop(loop_no, races, state, regime):
     if not plan.orders:
         print("  none")
 
-    reads, seconds = sig.take_read_count(), time.time() - started
-    print(f"\nloop took {seconds:.1f}s, {reads} SIG reads ({len(targets)} depth reads)")
+    reads, writes, seconds = sig.take_read_count(), budget.WRITES.take_count(), time.time() - started
+    print(f"\nloop took {seconds:.1f}s, {reads} SIG reads ({len(targets)} depth reads), {writes} SIG writes")
     worth_logging = [c for c in plan.candidates if c.edge >= config.MIN_EDGE - EPS]  # not every losing candidate
     logbook.log("opportunities", loop_no, [logbook.opportunity_row(c) for c in worth_logging])
     logbook.log("orders", loop_no, [logbook.order_row(o) for o in plan.orders])
     if plan.orders:  # a quiet loop is not worth a row
         logbook.log("loops", loop_no, [{"regime": config.REGIME, "cash": portfolio.cash, "invested": portfolio.invested,
                                         "bankroll": portfolio.bankroll, "opportunities": len(plan.chosen),
-                                        "orders": len(plan.orders), "sig_reads": reads, "seconds": round(seconds, 1),
+                                        "orders": len(plan.orders), "sig_reads": reads, "sig_writes": writes, "seconds": round(seconds, 1),
                                         "status": "ok"}])
     return None
 
