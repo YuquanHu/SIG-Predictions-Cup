@@ -4,3 +4,4 @@ __pycache__/
 logs/
 STOP
 .claude/settings.local.json
+.day_start.json

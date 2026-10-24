@@ -9,8 +9,8 @@ import config
 COLUMNS = {
     "opportunities": ["time", "loop", "race", "market", "side", "price", "fair", "edge", "kelly",
                       "half_kelly", "avail_shares", "decision"],
-    "orders": ["time", "loop", "action", "race", "market", "side", "price", "fair", "edge", "shares",
-               "value", "reason", "dry_run"],
+    "orders": ["time", "loop", "event", "order_id", "action", "race", "market", "side", "price", "shares",
+               "filled", "value", "fair", "edge", "reason", "dry_run", "detail"],
     "errors": ["time", "loop", "where", "error"],
     "loops": ["time", "loop", "regime", "cash", "invested", "bankroll", "opportunities", "orders", "sig_reads", "sig_writes", "seconds", "status"],
 }
@@ -53,7 +53,15 @@ def opportunity_row(c):
             "decision": c.decision}
 
 
-def order_row(o):
-    return {"action": o.action, "race": o.race, "market": o.market_id, "side": o.side, "price": o.price,
-            "fair": o.fair, "edge": o.edge, "shares": o.shares, "value": o.value, "reason": o.reason,
-            "dry_run": config.DRY_RUN}
+ORDER_EVENTS = ("would_place", "placed", "filled", "partial_fill", "cancelled", "rejected", "unconfirmed", "cancel_failed",
+                "cancel_all")
+
+
+def order_event(event, o=None, order_id="", filled="", detail=""):
+    """One orders.csv row. `event` is one of ORDER_EVENTS; `o` is the Order (None for an account-wide cancel-all)."""
+    assert event in ORDER_EVENTS, event
+    row = {"event": event, "order_id": order_id, "filled": filled, "detail": detail, "dry_run": config.DRY_RUN}
+    if o is not None:
+        row.update(action=o.action, race=o.race, market=o.market_id, side=o.side, price=o.price, shares=o.shares,
+                   value=o.value, fair=o.fair, edge=o.edge, reason=o.reason)
+    return row

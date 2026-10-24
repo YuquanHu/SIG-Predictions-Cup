@@ -1,6 +1,6 @@
 """Sizing, exits and swaps. Pure logic: turns opportunities and a portfolio into orders."""
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import config
 from orders import Order
@@ -95,3 +95,23 @@ def limit_orders(sells, buys, limit):
     kept_sells = sells[:limit]
     kept_buys = buys[:limit - len(kept_sells)]
     return kept_sells, kept_buys, sells[len(kept_sells):] + buys[len(kept_buys):]
+
+
+def cap_order_sizes(orders, balance):
+    """Hard cap on any single buy: ORDER_CAP_PCT of the cash balance. A bigger buy is cut down to the cap (or dropped
+    if what is left is below MIN_ORDER_VALUE). Sells are exempt, so the bot can always exit in full.
+    Returns (orders, notes)."""
+    max_value = config.ORDER_CAP_PCT * balance
+    kept, notes = [], []
+    for o in orders:
+        label = f"{o.race} {o.side.upper()} {o.market_id}"
+        if o.action == "sell" or o.value <= max_value:
+            kept.append(o)
+            continue
+        shares = math.floor(max_value / o.price)
+        if shares * o.price < config.MIN_ORDER_VALUE:
+            notes.append(f"{label}: buy dropped (single-order cap is {max_value:,.0f})")
+            continue
+        notes.append(f"{label}: buy cut from {o.shares:,.0f} to {shares:,} shares (single-order cap {max_value:,.0f})")
+        kept.append(replace(o, shares=shares))
+    return kept, notes

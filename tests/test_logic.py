@@ -70,10 +70,12 @@ class KeepTop(unittest.TestCase):
 
 class Sizing(unittest.TestCase):
     def test_targets_scale_to_investment_cap_then_race_cap(self):
-        chosen = [opp("A", "1", .5, .95), opp("B", "2", .5, .85), opp("C", "3", .5, .70)]  # half Kelly .45 .35 .20
-        wants = compute_wants(chosen, Portfolio(100000, [], 0))
-        self.assertEqual([round(w.target) for w in wants], [36000, 28000, 16000])
-        self.assertEqual([round(w.want) for w in wants], [30000, 28000, 16000])
+        chosen = [opp("A", "1", .5, .95), opp("B", "2", .5, .85), opp("C", "3", .5, .70)]  # half Kelly .45 .35 .20 = 1.0
+        wants = compute_wants(chosen, Portfolio(100000.0, [], 0))
+        scale = config.INVEST_CAP / 1.0                       # the three targets add up to 100%, so all shrink to the cap
+        self.assertEqual([round(w.target) for w in wants], [round(100000 * x * scale) for x in (.45, .35, .20)])
+        race_cap = config.RACE_CAP * 100000
+        self.assertEqual([round(w.want) for w in wants], [round(min(w.target, race_cap)) for w in wants])
 
     def test_subtracts_what_is_held_in_the_same_bet(self):
         held = [holding("A", "9", 20000, .5, .9)]  # 10000 already in the bet
@@ -158,9 +160,10 @@ class KillSwitch(unittest.TestCase):
 
     def test_daily_loss(self):
         state = RunState()
-        self.assertIsNone(check_loss(state, 100000))   # first reading is the baseline
-        self.assertIsNone(check_loss(state, 96000))
-        self.assertIn("down", check_loss(state, 94900))
+        limit = config.MAX_DAILY_LOSS
+        self.assertIsNone(check_loss(state, 100000))                              # first reading is the baseline
+        self.assertIsNone(check_loss(state, 100000 * (1 - limit * 0.8)))          # down, but not past the limit
+        self.assertIn("down", check_loss(state, 100000 * (1 - limit * 1.02)))     # past the limit
 
 
 if __name__ == "__main__":

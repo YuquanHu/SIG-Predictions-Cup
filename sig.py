@@ -143,6 +143,14 @@ def _read_depth(race_id, c):
     )
 
 
+def fetch_open_orders(exchange_id=None):
+    """The account's resting orders (all of them, or those on one exchange)."""
+    params = {"status": "open", "limit": 200}
+    if exchange_id:
+        params["exchangeId"] = exchange_id
+    return _get("/orders", **params)["data"]
+
+
 def fetch_account():
     """Cash balance and buying power (read-only)."""
     a = _get("/account")

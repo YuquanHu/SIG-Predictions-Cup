@@ -26,15 +26,18 @@ def scrub(text):
 
 
 class Client:
-    @staticmethod
-    def _send(method, url, path, params, body):
+    def __init__(self, verbose=True):
+        self.verbose = verbose  # True: print every request and response in full (test_trade); False: one line each
+
+    def _send(self, method, url, path, params, body):
         """One HTTP attempt: print the request, then the response; return (response, parsed json)."""
         if method != "GET":
             budget.WRITES.acquire()  # orders and cancels count against SIG's writes-per-minute limit
-        print(f"\n>>> {method} {url}" + (f"  params={params}" if params else ""))
-        print(">>> Authorization: Bearer ****")
-        if body is not None:
-            print(f">>> body: {json.dumps(body)}")
+        if self.verbose:
+            print(f"\n>>> {method} {url}" + (f"  params={params}" if params else ""))
+            print(">>> Authorization: Bearer ****")
+            if body is not None:
+                print(f">>> body: {json.dumps(body)}")
         try:
             resp = requests.request(method, url, params=params, json=body, timeout=config.HTTP_TIMEOUT,
                                     headers={"Authorization": f"Bearer {config.SIG_API_KEY}"})
@@ -45,8 +48,11 @@ class Client:
             data = resp.json()
         except ValueError:
             data = {"raw": resp.text[:500]}
-        print(f"<<< HTTP {resp.status_code}")
-        print(scrub(json.dumps(data, indent=2)))
+        if self.verbose:
+            print(f"<<< HTTP {resp.status_code}")
+            print(scrub(json.dumps(data, indent=2)))
+        else:
+            print(f"  [SIG] {method} {path} -> HTTP {resp.status_code}")
         return resp, data
 
     def request(self, method, path, params=None, body=None, expect=(200,)):
@@ -70,10 +76,16 @@ class Client:
         return resp.status_code, data
 
 
-def check_limit_order(quantity, price):
-    """Raise unless this is a whole, minimum-size limit order on the price tick (never a market order)."""
-    if not isinstance(quantity, int) or not MIN_ORDER_SHARES <= quantity <= MAX_ORDER_SHARES:
-        raise TradeError(f"refusing quantity {quantity!r}: only {MIN_ORDER_SHARES}..{MAX_ORDER_SHARES} allowed")
+def on_tick(price):
+    """`price` rounded onto SIG's 0.005 tick (prices computed as 1 - a quote can carry float noise)."""
+    return round(round(price / TICK) * TICK, 3)
+
+
+def check_limit_order(quantity, price, max_quantity=MAX_ORDER_SHARES):
+    """Raise unless this is a whole-share limit order on the price tick (never a market order).
+    test_trade keeps max_quantity at 1; the live trader passes its own limit."""
+    if not isinstance(quantity, int) or not MIN_ORDER_SHARES <= quantity <= max_quantity:
+        raise TradeError(f"refusing quantity {quantity!r}: only {MIN_ORDER_SHARES}..{max_quantity} allowed")
     if price is None or not MIN_PRICE - 1e-9 <= price <= MAX_PRICE + 1e-9:
         raise TradeError(f"refusing price {price!r}: market orders and prices outside "
                          f"{MIN_PRICE}..{MAX_PRICE} are not allowed")

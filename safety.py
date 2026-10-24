@@ -1,4 +1,5 @@
 """Kill switch: STOP file, consecutive errors, and daily loss."""
+import json
 import os
 from dataclasses import dataclass, field
 from datetime import date
@@ -36,11 +37,31 @@ def check_stop(state):
     return None
 
 
+def set_day_start(state, equity):
+    """Record `equity` as today's starting equity and keep it on disk, so a restart does not reset the loss limit."""
+    state.day, state.day_start_equity = date.today(), equity
+    with open(config.DAY_START_FILE, "w") as f:
+        json.dump({"date": state.day.isoformat(), "equity": equity}, f)
+
+
+def load_day_start(state):
+    """Reuse today's starting equity from an earlier run, if there is one. Returns True when it did."""
+    try:
+        with open(config.DAY_START_FILE) as f:
+            saved = json.load(f)
+        if saved["date"] == date.today().isoformat():
+            state.day, state.day_start_equity = date.today(), float(saved["equity"])
+            return True
+    except (OSError, ValueError, KeyError):
+        pass
+    return False
+
+
 def check_loss(state, equity):
-    """Reason to stop if equity (cash + positions) is down MAX_DAILY_LOSS since the day's first reading."""
-    today = date.today()
-    if state.day != today:
-        state.day, state.day_start_equity = today, equity
+    """Reason to stop if total equity (cash + positions at their sell price) is down MAX_DAILY_LOSS from the
+    start of the day. The first reading of a day (or the --day-start-equity value) is the baseline."""
+    if state.day != date.today():
+        set_day_start(state, equity)
     elif equity < state.day_start_equity * (1 - config.MAX_DAILY_LOSS):
         return f"down {1 - equity / state.day_start_equity:.1%} today ({state.day_start_equity:,.0f} -> {equity:,.0f})"
     return None

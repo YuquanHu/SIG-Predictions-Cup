@@ -9,3 +9,13 @@ After writing or changing code, and before reporting it as done, review the chan
 Fix the structural problems it flags (spaghetti branching, needless wrappers, logic in the wrong
 module, duplicated helpers, vague data shapes), keeping behavior the same, and re-run the affected
 script. In the final message, say briefly what the review found and changed.
+
+## Live trading (stage 6)
+
+`DRY_RUN = True` in `config.py` stays the default. Never set it to False, send a real order, or run `main.py` live yourself:
+the user does that, after typing `LIVE` at the start-up check. Live order handling (`trader.py`, `LiveTrader`) has only ever been
+tested against a fake client; real writes have only been made by `test_trade.py` (1 share, "yes" typed before each).
+
+Risk limits are in `settings.json` (max_invested 0.60, per race 0.30, single buy 2% of cash balance, daily loss 10%, 5 errors in a row).
+The invest cap blocks new buys only and never sells; sells are exempt from the single-order cap. The kill switch and Ctrl+C cancel
+every open order on the account; each loop only cancels the bot's own orders.
