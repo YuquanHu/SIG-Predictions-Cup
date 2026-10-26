@@ -5,6 +5,10 @@ from dataclasses import dataclass, field
 from datetime import date
 
 import config
+from books import Ledger
+from cooldown import Cooldown
+from gapmodel import GapStore
+from liquidity import VolumeStore
 
 
 @dataclass
@@ -14,6 +18,10 @@ class RunState:
     seen_warnings: set = field(default_factory=set)
     day: date | None = None
     day_start_equity: float | None = None
+    cooldown: Cooldown = field(default_factory=lambda: Cooldown(config.COOLDOWN_SECONDS))
+    gaps: GapStore = field(default_factory=GapStore)  # two-book strategy: the gap history
+    ledger: Ledger = field(default_factory=Ledger)    # two-book strategy: which book owns which shares
+    volumes: VolumeStore = field(default_factory=VolumeStore)  # two-book strategy: traded volume per market (fast book liquidity)
 
 
 def new_warnings(state, current):

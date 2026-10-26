@@ -1,5 +1,5 @@
 """Stage 3 strategy: fair value, edge, Kelly, and picking the top trades. Pure logic, no network."""
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import config
 from races import quote_available
@@ -12,6 +12,7 @@ class Fair:
     value: float | None  # None: no fair value, and `note` says why
     note: str
     sources: int = 0     # how many of Kalshi and Polymarket the value is built from
+    raw: float | None = None  # the value before the race was scaled to add up to 1 (None: not scaled)
 
 
 @dataclass
@@ -73,10 +74,25 @@ def fair_value(outcome, now):
     return Fair(sum(mids.values()) / len(mids), f"{used}{drop_note}", len(mids))
 
 
+def normalize(values):
+    """{outcome: probability} scaled to add up to exactly 1, so Dem Yes and Rep No (and every other pair of equivalent
+    bets) get the same fair value. Left as it is when an outcome has no value or the total is further than
+    PROBABILITY_TOLERANCE from 1: then a candidate is probably missing and scaling would hide it."""
+    total = sum(values.values()) if None not in values.values() else None
+    if total is None or abs(total - 1) > config.PROBABILITY_TOLERANCE:
+        return values
+    return {code: v / total for code, v in values.items()}
+
+
 def compute_fair_values(races, now):
-    """{(race_id, outcome code): Fair} for every outcome."""
-    return {(race_id, code): fair_value(o, now)
-            for race_id, race in races.items() for code, o in race["outcomes"].items()}
+    """{(race_id, outcome code): Fair} for every outcome, each race scaled to add up to 1 (see normalize)."""
+    fair = {}
+    for race_id, race in races.items():
+        raw = {code: fair_value(o, now) for code, o in race["outcomes"].items()}
+        scaled = normalize({code: f.value for code, f in raw.items()})
+        for code, f in raw.items():
+            fair[(race_id, code)] = f if scaled[code] == f.value else replace(f, value=scaled[code], raw=f.value)
+    return fair
 
 
 def wins_when(race, pays_if, side):
@@ -107,7 +123,7 @@ def find_opportunities(races, fair_values):
     return found
 
 
-def _keep_best(candidates, group, score, reason):
+def keep_best(candidates, group, score, reason):
     """Keep the highest-scoring candidate in each group; the rest get `reason(winner)` as their decision."""
     winners = {}
     for c in candidates:
@@ -132,9 +148,9 @@ def keep_top(candidates, n):
         else:
             eligible.append(c)
 
-    eligible = _keep_best(eligible, lambda c: (c.race, c.wins_when), lambda c: -c.price,
+    eligible = keep_best(eligible, lambda c: (c.race, c.wins_when), lambda c: -c.price,
                           lambda w: f"same bet as {w.side.upper()} {w.market_id}, which is cheaper")
-    eligible = _keep_best(eligible, lambda c: c.race, lambda c: c.kelly,
+    eligible = keep_best(eligible, lambda c: c.race, lambda c: c.kelly,
                           lambda w: f"{w.race} already has a better bet ({w.side.upper()} {w.market_id})")
 
     eligible.sort(key=lambda c: c.kelly, reverse=True)
@@ -143,12 +159,13 @@ def keep_top(candidates, n):
     return eligible[:n]
 
 
-def probability_gaps(races, fair_values, tolerance=0.05):
-    """[(race_id, total)] for races whose outcome fair values do not add up to about 1: a sign that a
+def probability_gaps(races, fair_values, tolerance=config.PROBABILITY_TOLERANCE):
+    """[(race_id, total)] for races whose outcome fair values (before scaling) do not add up to about 1: a sign that a
     candidate is missing from races.json (or that a price is off). Skips races with an outcome lacking a fair value."""
     gaps = []
     for race_id, race in races.items():
-        values = [fair_values[(race_id, code)].value for code in race["outcomes"]]
+        fairs = [fair_values[(race_id, code)] for code in race["outcomes"]]
+        values = [f.value if f.raw is None else f.raw for f in fairs]
         if None not in values and abs(sum(values) - 1) > tolerance:
             gaps.append((race_id, sum(values)))
     return gaps

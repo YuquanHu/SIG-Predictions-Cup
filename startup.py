@@ -2,6 +2,7 @@
 from datetime import date
 
 import config
+from trading import max_order_value
 
 
 def positions_value(positions):
@@ -23,14 +24,24 @@ def startup_check(mode, account, positions, open_orders, state, n_races, n_disab
     print(f"  total equity      : {equity:,.2f}")
     print(f"  open orders now   : {len(open_orders)}" + ("  (left alone; the kill switch and shutdown cancel ALL of them)"
                                                          if open_orders and live else ""))
+    print(f"  strategy          : {config.STRATEGY} ({'two books: structural hold + fast opportunity' if config.STRATEGY == 'v2' else 'top 4 by Kelly with swaps'})")
     print("  risk limits")
     print(f"    max invested    : {config.INVEST_CAP:.0%} of total equity  (blocks new buys only; never sells)")
     print(f"    per race        : {config.RACE_CAP:.0%} of total equity ({config.SINGLE_SOURCE_RACE_CAP:.0%} when the fair value "
           f"rests on one source)")
-    print(f"    single order    : {config.ORDER_CAP_PCT:.1%} of cash balance = {config.ORDER_CAP_PCT * cash:,.2f} per buy "
+    print(f"    single order    : {config.ORDER_CAP_PCT:.1%} of total equity = {max_order_value(equity):,.2f} per buy "
           f"(sells are not capped)")
     print(f"    orders per loop : {config.MAX_ORDERS_PER_LOOP}, sells first")
-    print(f"    minimum edge    : {config.MIN_EDGE * 100:.0f}c")
+    if config.STRATEGY == "v2":
+        print(f"    books           : hold {config.HOLD_BOOK_PCT:.0%} + fast {config.FAST_BOOK_PCT:.0%} of total equity; position cap {config.POSITION_CAP:.0%}")
+        print(f"    hold entry      : structural, edge at least {config.HOLD_MIN_EDGE * 100:.0f}c; one position per bucket, best ROI")
+        print(f"    fast entry      : {config.FAST_MIN_EDGE * 100:.0f}c beyond the usual gap; up to {config.FAST_MAX_POSITIONS} positions of "
+              f"{config.FAST_POSITION_PCT:.0%} of the fast book; time stop {config.FAST_MAX_HOURS}h")
+        print(f"    fast liquidity  : traded volume under {config.MIN_RECENT_VOLUME:,} since yesterday: no entry; under {config.LIQUIDITY_HIGH / 1e6:.0f}M: slice x{config.MEDIUM_SLICE_FACTOR:g}")
+        print("    thin markets    : " + ", ".join(f"fast part {floor * 100:.0f}c+: slice x{share:g}" for floor, share in reversed(config.THIN_SLICES))
+              + f" (volume under {config.LIQUIDITY_LOW / 1e6:.0f}M)")
+    else:
+        print(f"    minimum edge    : {config.MIN_EDGE * 100:.0f}c")
     baseline = state.day_start_equity if state.day == date.today() else None
     print(f"  kill switch       : stops the bot and cancels all orders if total equity falls {config.MAX_DAILY_LOSS:.0%} "
           f"from the start of the day, or {config.MAX_CONSECUTIVE_ERRORS} loops in a row fail")

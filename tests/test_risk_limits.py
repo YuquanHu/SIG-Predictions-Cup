@@ -17,6 +17,7 @@ from portfolio import Holding, Portfolio
 from safety import RunState, check_loss, check_stop, load_day_start
 from startup import startup_check
 from strategy import Opportunity
+from cooldown import Cooldown
 from trading import cap_order_sizes, compute_wants, sell_decisions
 
 
@@ -29,26 +30,25 @@ def opp(race="A", market="1", price=0.5, fair=0.9, wins="D"):
 
 
 class MaxInvested(unittest.TestCase):
-    def test_settings_json_keeps_max_invested_at_60_percent(self):
-        self.assertEqual(config.INVEST_CAP, 0.60)
-        with open(config.SETTINGS_FILE) as f:
-            self.assertEqual(json.load(f)["max_invested"], 0.60)
+    def test_settings_json_is_valid_whatever_limits_it_holds(self):
+        settings = config._load_settings(config.SETTINGS_FILE)  # stops with an error on an unknown key or an out-of-range value
+        self.assertLessEqual(settings["hold_book_pct"] + settings["fast_book_pct"], settings["max_invested"])
 
     def test_over_the_cap_means_no_new_buys_and_no_forced_sale(self):
         portfolio = Portfolio(30_000.0, [holding("A", "1", 35_000), holding("B", "2", 35_000)], 0.0)  # 70% invested
         self.assertEqual(portfolio.investable, 0)
-        self.assertEqual(sell_decisions(portfolio, wants=[]), [])      # nothing is sold just to get under the cap
+        self.assertEqual(sell_decisions(portfolio, [], Cooldown(0)), [])      # nothing is sold just to get under the cap
 
     def test_only_a_better_bet_or_negative_edge_sells_a_position_never_the_cap_itself(self):
         worse = holding("A", "1", 35_000, sell=0.80, fair=0.84)    # +5% expected return
         better = holding("B", "2", 35_000, sell=0.80, fair=0.96)   # +20%
         portfolio = Portfolio(30_000.0, [worse, better], 0.0)      # over the cap: no investable cash
         nothing_new = compute_wants([], portfolio)
-        self.assertEqual(sell_decisions(portfolio, nothing_new), [])
-        decisions = sell_decisions(portfolio, compute_wants([opp("C", "3", price=0.70, fair=0.80)], portfolio))
+        self.assertEqual(sell_decisions(portfolio, nothing_new, Cooldown(0)), [])
+        decisions = sell_decisions(portfolio, compute_wants([opp("C", "3", price=0.70, fair=0.80)], portfolio), Cooldown(0))
         self.assertEqual([h.market_id for h, _ in decisions], ["1"])   # only the worst, only for a better bet
         broken = holding("A", "1", 35_000, sell=0.80, fair=0.75)       # fair fell below the sell price
-        self.assertEqual([h.market_id for h, _ in sell_decisions(Portfolio(30_000.0, [broken], 0.0), [])], ["1"])
+        self.assertEqual([h.market_id for h, _ in sell_decisions(Portfolio(30_000.0, [broken], 0.0), [], Cooldown(0))], ["1"])
 
     def test_existing_positions_and_outside_positions_count_toward_the_cap(self):
         portfolio = Portfolio(40_000.0, [holding("A", "1", 20_000)], 10_000.0)   # equity 70k, invested 30k
@@ -127,22 +127,22 @@ class SingleOrderCap(unittest.TestCase):
     def order(self, action="buy", shares=2000, price=0.94):
         return Order(action, "no", "R", "274", shares, price, 0.99, "t")
 
-    def test_cap_is_2_percent_of_the_cash_balance(self):
+    def test_cap_is_2_percent_of_total_equity(self):
         self.assertEqual(config.ORDER_CAP_PCT, 0.02)
 
     def test_a_large_buy_is_cut_to_the_cap(self):
-        kept, notes = cap_order_sizes([self.order()], balance=42_000)       # cap 840 -> 893 shares at 0.94
+        kept, notes = cap_order_sizes([self.order()], equity=42_000)       # cap 840 -> 893 shares at 0.94
         self.assertEqual(kept[0].shares, 893)
         self.assertLessEqual(kept[0].value, 840)
         self.assertIn("cut", notes[0])
 
     def test_a_buy_that_would_shrink_below_the_minimum_is_dropped(self):
-        kept, notes = cap_order_sizes([self.order()], balance=400)          # cap 8 < MIN_ORDER_VALUE
+        kept, notes = cap_order_sizes([self.order()], equity=400)          # cap 8 < MIN_ORDER_VALUE
         self.assertEqual((kept, "dropped" in notes[0]), ([], True))
 
     def test_sells_and_small_buys_pass_unchanged(self):
         orders = [self.order("sell", 30_000, 0.90), self.order("buy", 100, 0.94)]
-        self.assertEqual(cap_order_sizes(orders, balance=42_000)[0], orders)
+        self.assertEqual(cap_order_sizes(orders, equity=42_000)[0], orders)
 
 
 class SettingsFile(unittest.TestCase):
@@ -153,7 +153,7 @@ class SettingsFile(unittest.TestCase):
                 f.write(content if isinstance(content, str) else json.dumps(content))
             return config._load_settings(path)
 
-    good = {"max_invested": 0.6, "max_per_race": 0.3, "max_order_pct_of_balance": 0.02,
+    good = {"max_invested": 0.6, "max_per_race": 0.3, "max_position_pct": 0.25, "hold_book_pct": 0.3, "fast_book_pct": 0.3, "max_order_pct_of_equity": 0.02,
             "max_daily_loss": 0.1, "max_consecutive_errors": 5}
 
     def test_a_valid_file_loads(self):
@@ -186,7 +186,7 @@ class StartupCheck(unittest.TestCase):
     def test_dry_run_prints_the_facts_and_does_not_ask_for_anything(self):
         text, asked = self.run_check("DRY RUN", iter([]))
         self.assertEqual(asked, [])
-        for fact in ("DRY RUN", "42,000.00", "60%", "2.0%", "840.00", "10%", "5 loops in a row"):
+        for fact in ("DRY RUN", "42,000.00", "42,900.00", "60%", "2.0%", "of total equity = 858.00", "10%", "5 loops in a row"):
             self.assertIn(fact, text)
 
     def test_live_continues_only_when_you_type_LIVE(self):

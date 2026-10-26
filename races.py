@@ -87,8 +87,15 @@ def load_races(path):
             "group": r["group"],
             "outcomes": outcomes,
             "contracts": contracts,
+            "rules_checked": bool(r.get("rules_checked", False)),  # someone read SIG's wording for the party and independent contracts
         }
     return races
+
+
+def needs_rules_check(race):
+    """A race with an independent (3+ outcomes) may be worded differently on SIG than on Kalshi and Polymarket, so it is
+    kept out of the hold book until races.json says "rules_checked": true."""
+    return len(race["outcomes"]) >= 3 and not race["rules_checked"]
 
 
 def iter_outcomes(races):

@@ -4,11 +4,13 @@ SIG allows 100 reads a minute per account. Bulk calls cover up to 100 markets pe
 through a sliding-window budget guard so the bot slows down instead of being locked out.
 """
 import time
+from datetime import datetime, timezone
 
 import requests
 
 import budget
 import config
+from liquidity import Volume
 from parallel import run_all
 from races import clear_quote, iter_contracts, warn
 
@@ -141,6 +143,27 @@ def _read_depth(race_id, c):
         ask_size=best_ask["quantity"] if best_ask else None,
         updated=time.time(),
     )
+
+
+def fetch_volumes(races, market_ids):
+    """{market_id: Volume} for the given SIG markets: all-time and since-yesterday traded volume from the daily candles, one
+    read each (run side by side). A market whose read fails is left out."""
+    wanted = set(market_ids)
+    found = run_all([lambda race_id=race_id, c=c: _read_volume(race_id, c)
+                     for race_id, c in iter_contracts(races) if c["market_id"] in wanted and c["sig_exchange_id"]])
+    return {market_id: volume for market_id, volume in found if volume}
+
+
+def _read_volume(race_id, c):
+    try:
+        candles = _get(f"/exchanges/{c['sig_exchange_id']}/price-history", resolution="1d", limit=100)["candles"]
+    except Exception as e:
+        warn(race_id, NAME, f"market {c['market_id']} volume: {e}")
+        return c["market_id"], None
+    now = time.time()
+    yesterday = now - now % 86400 - 86400
+    recent = sum(k["volume"] for k in candles if datetime.fromisoformat(k["time"]).timestamp() >= yesterday)
+    return c["market_id"], Volume(sum(k["volume"] for k in candles), recent, now)
 
 
 def fetch_open_orders(exchange_id=None):

@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Stage 6: the full trading loop, ready for live trading. DRY_RUN is True in config.py, so it only prints what it would do.
+"""The full trading loop, ready for live trading. DRY_RUN is True in config.py, so it only prints what it would do.
 
-    python3 main.py                            # loop until STOP file, kill switch, or Ctrl+C
+    python3 main.py                            # strategy v1 (top 4 by Kelly): loop until STOP file, kill switch, or Ctrl+C
+    python3 main.py --strategy v2              # two books: structural hold + fast opportunity (plan.md, end)
     python3 main.py --once                     # run a single loop and exit
     python3 main.py --day-start-equity 100000  # tell the daily-loss kill switch what today's starting equity was
 
 Start-up prints the mode, your balance and the risk limits. With DRY_RUN = False it then requires you to type LIVE.
-Each loop: cancel leftovers -> kill switch -> fetch prices and account -> opportunities -> top 4 -> exits and swaps ->
-size -> cap each buy -> place orders -> wait the order timeout, cancel the rest, read fills from your positions -> log ->
-wait for the regime's pause.
+Each loop: cancel leftovers -> kill switch -> fetch prices and account -> (v2: gap sample, ledger) -> opportunities ->
+v1: top 4, exits and swaps; v2: hold picks, fast entries and unwinds -> size -> cap each buy -> place orders -> wait the
+order timeout, cancel the rest, read fills from your positions (v2: book them in the ledger) -> log -> wait for the
+regime's pause.
 """
 import argparse
 import time
@@ -19,17 +21,19 @@ import config
 import logbook
 import sig
 import sig_trade
-from display import print_report
+from bookkeeping import opportunity_rows, prepare_history, refresh
+from books import Ledger
+from display import print_fast_report, print_hold_report, print_report
 from feeds import fetch_all, setup_all
 from parallel import run_all
-from planner import depth_targets, make_plan
+from planner import depth_targets, make_plan, make_plan_v2
 from portfolio import build_portfolio
 from races import disabled_races, drain_warnings, load_races
 from safety import RunState, check_loss, check_stop, load_day_start, new_warnings, set_day_start, stop_file_exists
 from startup import startup_check
-from strategy import EPS, compute_fair_values, probability_gaps
+from strategy import compute_fair_values, probability_gaps
 from trader import DryRunTrader, LiveTrader
-from trading import cap_order_sizes
+from trading import cap_order_sizes, max_order_value
 
 
 class OrderProblems(Exception):
@@ -58,25 +62,43 @@ def run_loop(loop_no, races, state, regime, trader):
     if reason:
         return reason
 
-    plan = make_plan(races, fair_values, portfolio)                    # screen every race on bulk prices
+    v2 = config.STRATEGY == "v2"
+    now = time.time()
+    baselines, ledger_notes = refresh(races, fair_values, positions, state, now) if v2 else ({}, [])
+
+    def plan_for(portfolio):
+        if v2:
+            return make_plan_v2(races, fair_values, portfolio, state.cooldown, baselines, state.ledger, state.volumes, now)
+        return make_plan(races, fair_values, portfolio, state.cooldown)
+
+    plan = plan_for(portfolio)                                         # screen every race on bulk prices
     targets = depth_targets(plan, config.MAX_DEPTH_READS_PER_LOOP)
     if targets:                                                        # real sizes and fresh prices where money moves
         sig.fetch_depth(races, targets)
         portfolio = build_portfolio(cash, positions, races, fair_values)
-        plan = make_plan(races, fair_values, portfolio)
+        plan = plan_for(portfolio)
 
-    to_place, cap_notes = cap_order_sizes(plan.orders, portfolio.cash)
-    print_report(portfolio, plan.chosen, [o for o in to_place if o.action == "sell"], plan.notes + cap_notes)
+    to_place, cap_notes = cap_order_sizes(plan.orders, portfolio.bankroll)
+    print_report(portfolio, plan.chosen, [o for o in to_place if o.action == "sell"], ledger_notes + plan.notes + cap_notes,
+                 state.ledger if v2 else None)
+    if v2:
+        print_hold_report(plan.buckets, portfolio.bankroll)
+        print_fast_report(plan.fast_rows)
     print("\nOrders")
     if not to_place:
         print("  none")
-    problems = trader.execute(to_place, regime.order_timeout, positions, loop_no, config.ORDER_CAP_PCT * portfolio.cash)
+    execution = trader.execute(to_place, regime.order_timeout, positions, loop_no, max_order_value(portfolio.bankroll))
+    problems = execution.problems
+    if v2:  # book what filled before the next loop's reconcile would adopt it as a grandfathered hold lot
+        state.ledger.record_fills(execution.fills, time.time())
+        state.ledger.save()
+    state.cooldown.record(to_place)
     state.orders_may_be_open = trader.has_open_orders()
 
     reads, writes, seconds = sig.take_read_count(), budget.WRITES.take_count(), time.time() - started
     print(f"\nloop took {seconds:.1f}s, {reads} SIG reads ({len(targets)} depth reads), {writes} SIG writes")
-    worth_logging = [c for c in plan.candidates if c.edge >= config.MIN_EDGE - EPS]  # not every losing candidate
-    logbook.log("opportunities", loop_no, [logbook.opportunity_row(c) for c in worth_logging])
+    logbook.log("opportunities", loop_no, opportunity_rows(  # not every losing candidate
+        plan.candidates, baselines, min(config.HOLD_MIN_EDGE, config.FAST_MIN_EDGE) if v2 else config.MIN_EDGE))
     if to_place or problems:  # a quiet loop is not worth a row
         logbook.log("loops", loop_no, [{"regime": config.REGIME, "cash": portfolio.cash, "invested": portfolio.invested,
                                         "bankroll": portfolio.bankroll, "opportunities": len(plan.chosen),
@@ -113,14 +135,20 @@ def wait(seconds):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--once", action="store_true", help="run one loop and exit")
+    parser.add_argument("--strategy", choices=("v1", "v2"), help="v1: top 4 by Kelly (default); v2: two books (plan.md, end)")
     parser.add_argument("--day-start-equity", type=float, metavar="AMOUNT",
                         help="today's starting total equity, for the daily-loss kill switch (default: the first reading today)")
     args = parser.parse_args()
+    if args.strategy:
+        config.STRATEGY = args.strategy
     regime = config.REGIMES[config.REGIME]
 
     races = load_races(config.RACES_FILE)
     setup_all(races)
     state = RunState()
+    if config.STRATEGY == "v2":
+        state.ledger = Ledger.load()
+        prepare_history(races, state)
     load_day_start(state)
     if args.day_start_equity:
         set_day_start(state, args.day_start_equity)

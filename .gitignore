@@ -5,3 +5,9 @@ logs/
 STOP
 .claude/settings.local.json
 .day_start.json
+.gap_history.csv
+.gap_history_norm.csv
+.ledger.json
+.volume_cache.json
+analysis/backtest_cache/
+analysis/backtest_out/

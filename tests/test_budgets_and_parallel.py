@@ -1,4 +1,6 @@
 """Offline tests for: the write guard, the order cap, and parallel fetching. No network."""
+import contextlib
+import io
 import threading
 import time
 import unittest
@@ -9,6 +11,7 @@ import config
 import feeds
 import orders
 import sig_trade
+from cooldown import Cooldown
 from parallel import run_all
 from planner import make_plan
 from portfolio import Portfolio
@@ -44,8 +47,9 @@ class WriteBudget(unittest.TestCase):
 
     def test_dry_run_orders_and_cancels_are_counted(self):
         order = orders.Order("buy", "no", "R", "1", 10, 0.5, 0.6, "t")
-        orders.place_order(order, timeout=3)
-        orders.cancel_all()
+        with mock.patch.object(config, "DRY_RUN", True), contextlib.redirect_stdout(io.StringIO()):  # whatever config.py says
+            orders.place_order(order, timeout=3)
+            orders.cancel_all()
         self.assertEqual(budget.WRITES.take_count(), 2)
 
     def test_real_requests_wait_for_the_budget_but_reads_do_not_use_it(self):
@@ -82,7 +86,7 @@ class OrderCap(unittest.TestCase):
                  for i in range(4)}
         fair = {(f"R{i}", f"O{i}"): Fair(0.70, "t", 2) for i in range(4)}
         with mock.patch.object(config, "MAX_ORDERS_PER_LOOP", 2):
-            plan = make_plan(races, fair, Portfolio(1e6, [], 0.0))
+            plan = make_plan(races, fair, Portfolio(1e6, [], 0.0), Cooldown(0))
         self.assertEqual(len(plan.orders), 2)
         self.assertEqual(len(plan.skipped), 2)
         self.assertEqual(sum("skipped" in n for n in plan.notes), 2)

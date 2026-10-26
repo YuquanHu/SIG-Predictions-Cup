@@ -5,6 +5,8 @@ from unittest import mock
 import budget
 import config
 import sig
+from cooldown import Cooldown
+from orders import Order
 from planner import depth_targets, make_plan
 from portfolio import Portfolio
 from races import drain_warnings, empty_quote
@@ -109,12 +111,12 @@ class ReadBudget(unittest.TestCase):
 
 
 class TwoPassPlanning(unittest.TestCase):
-    def plan_for(self, held_value=0.0):
+    def plan_for(self, cooldown=None):
         races = races_with(2)
         for c, (bid, ask) in zip(races["R"]["contracts"], ((0.40, 0.45), (0.50, 0.55))):
             c["yes"].update(bid=bid, ask=ask)         # bulk quote: no sizes yet
         fair = {("R", "D"): Fair(0.60, "t"), ("R", "R"): Fair(0.40, "t")}
-        return make_plan(races, fair, Portfolio(100000.0, [], 0.0))
+        return make_plan(races, fair, Portfolio(100000.0, [], 0.0), cooldown or Cooldown(0))
 
     def test_bulk_prices_alone_buy_nothing_but_name_the_markets_to_read(self):
         plan = self.plan_for()
@@ -124,6 +126,13 @@ class TwoPassPlanning(unittest.TestCase):
     def test_depth_reads_are_capped(self):
         plan = self.plan_for()
         self.assertEqual(depth_targets(plan, limit=0), [])
+
+    def test_a_market_just_sold_is_not_bought_back_and_its_read_is_saved(self):
+        cooldown = Cooldown(300)
+        cooldown.record([Order("sell", "yes", "R", "0", 10, 0.45, 0.6, "t")])
+        plan = self.plan_for(cooldown)
+        self.assertEqual(depth_targets(plan, limit=6), [])
+        self.assertIn("cooldown", " ".join(plan.notes))
 
 
 if __name__ == "__main__":

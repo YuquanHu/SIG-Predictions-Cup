@@ -15,6 +15,7 @@ class Order:
     price: float   # limit price per share of `side`
     fair: float    # fair probability that `side` wins
     reason: str
+    book: str = "hold"  # which book the order belongs to: "hold" or "fast"
 
     @property
     def edge(self):

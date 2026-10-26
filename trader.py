@@ -3,7 +3,7 @@ filled once the order timeout is up, and reads what filled from the SIG position
 
 Both have the same four methods, so main.py does not care which one it has:
     cancel_open(loop_no)                    cancel orders left over from an earlier loop
-    execute(orders, timeout, positions_before, loop_no, max_order_value) -> number of problems
+    execute(orders, timeout, positions_before, loop_no, max_order_value) -> Execution (problems and what filled)
     has_open_orders()                       True while the bot may have resting orders
     cancel_everything()                     account-wide cancel (kill switch and shutdown)
 """
@@ -22,6 +22,12 @@ UNCONFIRMED_STATUSES = (None, 500, 502, 503)  # None: no response at all. The or
 MAX_SHARES = 2_147_483_647                     # SIG's limit on one order's quantity
 
 
+@dataclass
+class Execution:
+    problems: int  # orders rejected, never confirmed, or that could not be cancelled
+    fills: list    # [(Order, shares filled)] for every order that filled at least one share; the ledger books them
+
+
 class DryRunTrader:
     mode = "DRY RUN"
 
@@ -36,7 +42,7 @@ class DryRunTrader:
             orders.place_order(o, timeout)
             logbook.log("orders", loop_no, [logbook.order_event("would_place", o)])
         self._placed = bool(to_place)
-        return 0
+        return Execution(0, [])
 
     def has_open_orders(self):
         return self._placed
@@ -236,11 +242,12 @@ class LiveTrader:
         self._reconcile(unconfirmed, loop_no)
 
         tracked = [p for p in placements if p.status in ("placed", "unconfirmed")]
+        fills = []
         if tracked:
             fills, order_says = self._read_fills(tracked, signed_by_market(positions_before))
             for p, filled, says in zip(tracked, fills, order_says):
                 problems += self._log_outcome(p, filled, says, loop_no)
-        return problems
+        return Execution(problems, [(p.order, filled) for p, filled in zip(tracked, fills) if filled > 0])
 
     def _log_outcome(self, p, filled, order_says, loop_no):
         o = p.order

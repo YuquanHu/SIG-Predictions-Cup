@@ -10,9 +10,16 @@ from portfolio import Holding, Portfolio
 from races import disabled_races, empty_quote, load_races
 from safety import RunState, check_loss, check_stop
 from strategy import Opportunity, fair_value, keep_top
-from trading import compute_wants, decide_sells, size_buys
+from cooldown import Cooldown
+from orders import Order
+from trading import compute_wants, sell_decisions, sell_orders, size_buys
 
 NOW = time.time()
+NO_COOLDOWN = Cooldown(0)
+
+
+def decide_sells(portfolio, wants):
+    return sell_orders(sell_decisions(portfolio, wants, NO_COOLDOWN))
 
 
 def quote(bid, ask, age=0):
@@ -121,6 +128,60 @@ class ExitsAndSwaps(unittest.TestCase):
         new = opp("C", "3", .50, .70, wins="D", side="yes")
         broke = Portfolio(0.0, held, 0)
         self.assertEqual(decide_sells(broke, compute_wants([new], broke)), [])
+
+
+class SwapRules(unittest.TestCase):
+    """The swap fixes: no dust swaps, no sale without a buy to follow, no flip-flopping."""
+    held = [holding("A", "1", 100_000, .80, .84)]  # +5% expected return, all of the bankroll
+
+    def broke(self, held=None):
+        return Portfolio(0.0, held or self.held, 0)  # everything invested: no investable cash
+
+    def swap(self, new, portfolio=None, cooldown=NO_COOLDOWN):
+        portfolio = portfolio or self.broke()
+        return sell_decisions(portfolio, compute_wants([new], portfolio), cooldown)
+
+    def test_a_good_swap_still_happens(self):
+        self.assertEqual([h.market_id for h, _ in self.swap(opp("C", "3", .70, .80))], ["1"])
+
+    def test_a_swap_below_one_percent_of_equity_is_skipped(self):
+        dust = [holding("A", "1", 5, .80, .84, depth=5)]  # the book takes 5 shares: 4.0 of value
+        self.assertEqual(self.swap(opp("C", "3", .70, .80), self.broke(dust)), [])
+
+    def test_no_sale_when_the_replacement_buy_would_be_too_small(self):
+        thin = opp("C", "3", .70, .80, size=5)  # only 5 shares on offer: 3.5 of value, under MIN_ORDER_VALUE
+        self.assertEqual(self.swap(thin), [])
+
+    def test_the_next_worst_holding_is_used_when_the_worst_is_too_small(self):
+        held = [holding("A", "1", 5, .80, .84, depth=5), holding("B", "2", 1000, .80, .88)]  # +5% (dust) and +10%
+        decisions = self.swap(opp("C", "3", .70, .83), self.broke(held))                    # new +18.6%
+        self.assertEqual([h.market_id for h, _ in decisions], ["2"])
+
+    def test_a_position_bought_a_moment_ago_is_not_swapped_out(self):
+        clock = [1000.0]
+        cooldown = Cooldown(300, clock=lambda: clock[0])
+        cooldown.record([Order("buy", "no", "A", "1", 10, .8, .9, "t")])
+        self.assertEqual(self.swap(opp("C", "3", .70, .80), cooldown=cooldown), [])
+        clock[0] += 301
+        self.assertEqual([h.market_id for h, _ in self.swap(opp("C", "3", .70, .80), cooldown=cooldown)], ["1"])
+
+    def test_a_negative_edge_exit_ignores_the_cooldown(self):
+        cooldown = Cooldown(300)
+        cooldown.record([Order("buy", "no", "A", "1", 10, .8, .9, "t")])
+        bad = [holding("A", "1", 1000, .80, .75)]
+        self.assertEqual([h.market_id for h, _ in sell_decisions(self.broke(bad), [], cooldown)], ["1"])
+
+
+class CooldownRules(unittest.TestCase):
+    def test_only_the_opposite_direction_is_blocked_and_only_for_the_cooldown_time(self):
+        clock = [0.0]
+        cooldown = Cooldown(300, clock=lambda: clock[0])
+        cooldown.record([Order("sell", "no", "A", "1", 10, .8, .9, "t")])
+        self.assertTrue(cooldown.blocks("1", "buy"))       # buying back what was just sold
+        self.assertFalse(cooldown.blocks("1", "sell"))     # selling more of it is fine
+        self.assertFalse(cooldown.blocks("2", "buy"))      # other markets are not affected
+        clock[0] = 300
+        self.assertFalse(cooldown.blocks("1", "buy"))
 
 
 class MissingPolymarketId(unittest.TestCase):

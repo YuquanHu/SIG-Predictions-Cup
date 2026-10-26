@@ -8,8 +8,8 @@ import config
 
 COLUMNS = {
     "opportunities": ["time", "loop", "race", "market", "side", "price", "fair", "edge", "kelly",
-                      "half_kelly", "avail_shares", "decision"],
-    "orders": ["time", "loop", "event", "order_id", "action", "race", "market", "side", "price", "shares",
+                      "half_kelly", "avail_shares", "bucket", "usual_gap", "fast_part", "decision"],
+    "orders": ["time", "loop", "event", "order_id", "book", "action", "race", "market", "side", "price", "shares",
                "filled", "value", "fair", "edge", "reason", "dry_run", "detail"],
     "errors": ["time", "loop", "where", "error"],
     "loops": ["time", "loop", "regime", "cash", "invested", "bankroll", "opportunities", "orders", "sig_reads", "sig_writes", "seconds", "status"],
@@ -47,10 +47,10 @@ def log(kind, loop_no, rows):
             writer.writerow({"time": stamp, "loop": loop_no, **row})
 
 
-def opportunity_row(c):
+def opportunity_row(c, bucket="", usual_gap="", fast_part=""):
     return {"race": c.race, "market": c.market_id, "side": c.side, "price": c.price, "fair": c.fair,
             "edge": c.edge, "kelly": c.kelly, "half_kelly": c.half_kelly, "avail_shares": c.size,
-            "decision": c.decision}
+            "bucket": bucket, "usual_gap": usual_gap, "fast_part": fast_part, "decision": c.decision}
 
 
 ORDER_EVENTS = ("would_place", "placed", "filled", "partial_fill", "cancelled", "rejected", "unconfirmed", "cancel_failed",
@@ -62,6 +62,6 @@ def order_event(event, o=None, order_id="", filled="", detail=""):
     assert event in ORDER_EVENTS, event
     row = {"event": event, "order_id": order_id, "filled": filled, "detail": detail, "dry_run": config.DRY_RUN}
     if o is not None:
-        row.update(action=o.action, race=o.race, market=o.market_id, side=o.side, price=o.price, shares=o.shares,
+        row.update(book=o.book, action=o.action, race=o.race, market=o.market_id, side=o.side, price=o.price, shares=o.shares,
                    value=o.value, fair=o.fair, edge=o.edge, reason=o.reason)
     return row

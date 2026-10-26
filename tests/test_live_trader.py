@@ -69,8 +69,8 @@ class Base(unittest.TestCase):
         client = FakeClient(router)
         trader = LiveTrader(client, RACES)
         with mock.patch("trader.sig.fetch_positions", return_value=after), mock.patch("trader.sig.fetch_open_orders", return_value=[]):
-            problems = trader.execute(orders, timeout=3, positions_before=before, loop_no=1, max_order_value=max_value)
-        return client, trader, problems
+            self.execution = trader.execute(orders, timeout=3, positions_before=before, loop_no=1, max_order_value=max_value)
+        return client, trader, self.execution.problems
 
 
 class Fills(unittest.TestCase):
@@ -112,6 +112,16 @@ class Placing(Base):
         self.assertEqual(client.sent("DELETE", "/orders"), [])
         self.assertEqual([e["event"] for e in self.events()], ["placed", "filled"])
         self.assertEqual(problems, 0)
+
+    def test_execute_returns_what_filled_for_the_ledger(self):
+        def router(method, path, body):
+            return placed(8, open_=False, traded=100) if method == "POST" else (200, {"quantityFilled": 100})
+        self.run_trader(router, [buy()], before=[], after=[position("274", "no", 100)])
+        self.assertEqual([(o.market_id, o.side, shares) for o, shares in self.execution.fills], [("274", "no", 100)])
+
+    def test_an_order_that_did_not_fill_is_not_in_the_fills(self):
+        self.run_trader(lambda m, p, b: placed(7) if m == "POST" else (200, {"quantityFilled": 0}), [buy()], before=[], after=[])
+        self.assertEqual(self.execution.fills, [])
 
     def test_partial_fill_cancels_the_rest_and_reads_the_amount_from_positions(self):
         def router(method, path, body):
@@ -167,7 +177,7 @@ class Placing(Base):
         trader = LiveTrader(client, RACES)
         resting = [{"id": 99, "side": "no", "action": "buy", "priceLimit": 0.94}, {"id": 98, "side": "yes", "action": "buy", "priceLimit": 0.5}]
         with mock.patch("trader.sig.fetch_positions", return_value=[]), mock.patch("trader.sig.fetch_open_orders", return_value=resting):
-            problems = trader.execute([buy()], 3, [], 1, 10_000)
+            problems = trader.execute([buy()], 3, [], 1, 10_000).problems
         self.assertEqual(problems, 1)
         self.assertEqual([e["event"] for e in self.events()][0], "unconfirmed")
         self.assertEqual([c[1] for c in client.sent("DELETE", "/orders")], ["/orders/99"])  # only the exact match
