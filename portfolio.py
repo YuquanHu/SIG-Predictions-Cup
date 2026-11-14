@@ -16,6 +16,8 @@ class Holding:
     sell_price: float | None  # what selling returns per share right now
     sell_depth: float | None  # shares the book will take at that price
     fair: float | None        # fair probability that the held side wins
+    sell_ladder: list | None = None  # [(price, shares)] the held side's bids, best first: what an exit sells into
+    rest_ladder: list | None = None  # [(price, shares)] the held side's asks, best first: where a resting sell would queue
 
     @property
     def exp_return(self):
@@ -64,13 +66,16 @@ def build_portfolio(cash, positions, races, fair_values):
             continue
         race_id, c = contracts[p["market_id"]]
         yes = c["yes"]
+        bids, asks = yes["bid_levels"], yes["ask_levels"]
         if p["side"] == "yes":
-            sell_price, depth = yes["bid"], yes["bid_size"]
-        else:  # selling a No is buying the Yes back at the ask
+            sell_price, depth, sell_ladder, rest_ladder = yes["bid"], yes["bid_size"], bids, asks
+        else:  # selling a No is buying the Yes back at the ask; the No book is the Yes book mirrored
             sell_price, depth = (None if yes["ask"] is None else 1 - yes["ask"]), yes["ask_size"]
+            sell_ladder = None if asks is None else [(round(1 - price, 3), qty) for price, qty in asks]
+            rest_ladder = None if bids is None else [(round(1 - price, 3), qty) for price, qty in bids]
         fair_yes = fair_values[(race_id, c["pays_if"])].value
         fair = None if fair_yes is None else (fair_yes if p["side"] == "yes" else 1 - fair_yes)
         mark = sell_price if sell_price is not None else (p["current_price"] or 0)
         holdings.append(Holding(race_id, p["market_id"], p["side"], wins_when(races[race_id], c["pays_if"], p["side"]),
-                                p["shares"], p["shares"] * mark, sell_price, depth, fair))
+                                p["shares"], p["shares"] * mark, sell_price, depth, fair, sell_ladder, rest_ladder))
     return Portfolio(cash, holdings, outside_value)

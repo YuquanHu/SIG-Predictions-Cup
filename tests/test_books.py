@@ -28,7 +28,7 @@ class RecordFills(unittest.TestCase):
                          [("fast", 80, 0.9, 7.0, None, False)])
 
     def test_a_filled_hold_buy_takes_the_bucket_of_its_pick(self):
-        ledger = Ledger(picks={"favourite": ("1", "no")})
+        ledger = Ledger(picks={"favourite": [("2", "no"), ("1", "no")]})
         ledger.record_fills([(order("buy"), 50)], now=1.0)
         self.assertEqual(ledger.bucket_of("1", "no"), "favourite")
 
@@ -91,14 +91,21 @@ class Reconcile(unittest.TestCase):
 
 class Storage(unittest.TestCase):
     def test_roundtrip_keeps_lots_and_picks(self):
-        ledger = Ledger([lot("1", bucket="sure bet", grandfathered=True)], {"sure bet": ("1", "no")})
+        ledger = Ledger([lot("1", bucket="sure bet", grandfathered=True)], {"sure bet": [("1", "no"), ("2", "yes")]})
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "ledger.json")
             ledger.save(path)
             loaded = Ledger.load(path)
         self.assertEqual(loaded.lots, ledger.lots)
-        self.assertEqual(loaded.picks, {"sure bet": ("1", "no")})
+        self.assertEqual(loaded.picks, {"sure bet": [("1", "no"), ("2", "yes")]})
         self.assertEqual(loaded.bucket_of("1", "no"), "sure bet")
+
+    def test_a_ledger_saved_with_one_pick_per_bucket_loads_as_lists(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "ledger.json")
+            with open(path, "w") as f:
+                f.write('{"lots": [], "picks": {"sure bet": ["388", "no"], "favourite": ["243", "yes"]}}')
+            self.assertEqual(Ledger.load(path).picks, {"sure bet": [("388", "no")], "favourite": [("243", "yes")]})
 
     def test_a_missing_file_is_an_empty_ledger(self):
         loaded = Ledger.load("/nonexistent/ledger.json")

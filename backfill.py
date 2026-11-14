@@ -116,9 +116,10 @@ def race_gaps(race, starts, end):
 
 
 def fetch_start(store, market_id, now):
-    """Where a contract's missing history begins: 48 hours ago when it has too few samples, else just after its newest
-    sample when that is more than STALE_TAIL old (the bot was off), else None (nothing to fetch)."""
-    window_start = now - config.HISTORY_HOURS * 3600
+    """Where a contract's missing history begins: the start of the baselines' window (48 hours before now, or before a frozen
+    baseline) when it has too few samples, else just after its newest sample when that is more than STALE_TAIL old (the bot
+    was off), else None (nothing to fetch)."""
+    window_start = store.as_of(now) - config.HISTORY_HOURS * 3600
     latest = store.latest(market_id)
     if store.count(market_id, now) < config.MIN_HISTORY_SAMPLES or latest is None:
         return window_start

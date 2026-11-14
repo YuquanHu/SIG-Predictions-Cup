@@ -1,6 +1,7 @@
 """Offline tests for the fast book: entry beyond the usual gap, sizing, unwinds, swaps and the merged v2 plan.
 Run: python3 -m unittest discover -s tests -t ."""
 import unittest
+from unittest import mock
 
 import config
 import fast
@@ -17,6 +18,8 @@ from strategy import Fair, Opportunity
 EQUITY = 100_000.0
 NOW = 1_700_000_000.0
 HOURS = 3600
+FRESH_HOURS = config.FAST_MAX_HOURS / 10      # a position well inside the time stop, whatever FAST_MAX_HOURS is
+OVERDUE_HOURS = config.FAST_MAX_HOURS + 1      # and one past it
 
 
 def opp(market, fair=0.985, price=0.90, side="no", wins="D", size=1e6):
@@ -37,8 +40,17 @@ def held(market, value, fair=0.985, sell=0.90, side="no", wins="D"):
     return Holding(f"R{market}", market, side, wins, value / sell, value, sell, 1e6, fair)
 
 
-def fast_lot(market, shares, age_hours=1.0, side="no"):
+def fast_lot(market, shares, age_hours=FRESH_HOURS, side="no"):
     return Lot("fast", market, side, shares, 0.9, NOW - age_hours * HOURS)
+
+
+def fair_at_z(price, usual, z):
+    """The fair value at which a No sold at `price` has a fast part (fair - price - usual) whose z (fast.part_z) is `z`."""
+    low, high = 0.0, 0.99 - price - usual
+    for _ in range(60):
+        mid = (low + high) / 2
+        low, high = (mid, high) if fast.part_z(price + usual + mid, mid) < z else (low, mid)
+    return price + usual + low
 
 
 def volumes_for(*markets, total=10e6, recent=50_000):
@@ -54,14 +66,15 @@ def run(candidates, baselines, holdings=(), lots=(), cooldown=None, races=None, 
 
 class CaughtUp(unittest.TestCase):
     def test_it_is_caught_up_when_what_selling_earns_beyond_the_usual_gap_is_noise(self):
-        self.assertTrue(fast.caught_up(base(-0.05), "no", 0.055))         # 0.5c beyond the 5c usual gap
-        self.assertFalse(fast.caught_up(base(-0.05), "no", 0.08))         # 3c still ahead
-        self.assertFalse(fast.caught_up(UNCLASSIFIED, "no", 0.0))         # no baseline: no verdict
-        self.assertTrue(fast.caught_up(base(0.05), "no", 0.01))           # a usual gap pointing the other way counts as 0
+        self.assertTrue(fast.caught_up(base(-0.05), 0.055))         # 0.5c beyond the 5c usual gap
+        self.assertFalse(fast.caught_up(base(-0.05), 0.08))         # 3c still ahead
+        self.assertFalse(fast.caught_up(UNCLASSIFIED, 0.0))         # no baseline: no verdict
+        self.assertTrue(fast.caught_up(base(0.05), 0.01))           # a usual gap pointing the other way counts by its size
 
     def test_the_time_stop(self):
-        self.assertFalse(fast.time_up(NOW - 23 * HOURS, NOW))
-        self.assertTrue(fast.time_up(NOW - 24 * HOURS, NOW))
+        limit = config.FAST_MAX_HOURS * HOURS
+        self.assertFalse(fast.time_up(NOW - limit + 60, NOW))
+        self.assertTrue(fast.time_up(NOW - limit, NOW))
 
 
 class Entry(unittest.TestCase):
@@ -103,10 +116,24 @@ class Entry(unittest.TestCase):
         self.assertEqual(plan.wants, [])
         self.assertIn("does not survive the 3.0c spread", plan.rows[0].note)
 
-    def test_candidates_are_ranked_by_fast_part_over_price(self):
+    def test_an_uncertain_fair_value_needs_a_bigger_edge_to_enter(self):
+        for k in (0.5, config.ELECTION_K, 2.0):
+            with self.subTest(k=k), mock.patch.object(config, "ELECTION_K", k):
+                usual, edge = 0.05, 0.085                                                  # a fast part of 3.5c, over the pinned 3c minimum
+                for uncertainty, enters in ((0.0, True), ((edge - usual - config.FAST_MIN_EDGE) / k + 0.005, False)):
+                    c = opp("1", fair=0.985, price=0.90)
+                    c.uncertainty = uncertainty
+                    plan = run([c], {"1": base(-usual)})
+                    self.assertEqual(bool(plan.wants), enters, (k, uncertainty))
+
+    def test_candidates_are_ranked_by_fast_part_not_by_its_roi(self):
         small, big = opp("1", fair=0.985, price=0.90), opp("2", fair=0.995, price=0.90)     # 3.5c and 4.5c beyond 5c usual
         plan = run([small, big], {"1": base(), "2": base()})
         self.assertEqual([w.opp.market_id for w in plan.wants], ["2", "1"])
+        longshot, favourite = opp("3", fair=0.29, price=0.20), opp("4", fair=0.98, price=0.85)   # 4c (20% ROI) and 8c (9.4%)
+        self.assertGreater(longshot.edge / longshot.price, favourite.edge / favourite.price)
+        plan = run([longshot, favourite], {"3": base(), "4": base()})
+        self.assertEqual([w.opp.market_id for w in plan.wants], ["4", "3"])
 
     def test_of_two_equivalent_bets_that_both_qualify_the_cheaper_is_bought(self):
         dearer = Opportunity("FL", "300", "R", "yes", 0.795, 0.84, 1e6, "R", 2)   # 4.5c edge, ranks first
@@ -186,9 +213,14 @@ class Unwind(unittest.TestCase):
         plan = run([], {"1": base(-0.05)}, [h], [fast_lot("1", h.shares)])
         self.assertEqual((plan.sells, plan.rows[0].note), ([], "holds"))
 
-    def test_the_time_stop_sells_after_24_hours(self):
+    def test_a_held_row_says_how_long_ago_the_position_was_first_bought(self):
         h = held("1", 10_000, fair=0.985, sell=0.90)
-        plan = run([], {"1": base(-0.05)}, [h], [fast_lot("1", h.shares, age_hours=25)])
+        lots = [fast_lot("1", h.shares / 2, age_hours=FRESH_HOURS * 2), fast_lot("1", h.shares / 2, age_hours=FRESH_HOURS)]
+        self.assertAlmostEqual(run([], {"1": base(-0.05)}, [h], lots).rows[0].age, FRESH_HOURS * 2 * HOURS)
+
+    def test_the_time_stop_sells_after_the_time_limit(self):
+        h = held("1", 10_000, fair=0.985, sell=0.90)
+        plan = run([], {"1": base(-0.05)}, [h], [fast_lot("1", h.shares, age_hours=OVERDUE_HOURS)])
         self.assertIn("time stop", plan.sells[0].reason)
 
     def test_a_negative_edge_is_left_to_the_hold_books_whole_position_exit(self):
@@ -202,8 +234,17 @@ class Unwind(unittest.TestCase):
         self.assertEqual((len(plan.sells), plan.wants), (1, []))
 
 
+class ReportOdds(unittest.TestCase):
+    def test_a_held_row_is_priced_at_its_sell_price_and_a_candidate_at_its_ask(self):
+        h = held("1", 4_000, fair=0.985, sell=0.88)
+        plan = run([opp("2", fair=0.99, price=0.85)], {"1": base(), "2": base()}, [h], [fast_lot("1", h.shares)])
+        rows = {r.label: r for r in plan.rows}
+        self.assertEqual((rows["R1 NO 1"].fair, rows["R1 NO 1"].price), (0.985, 0.88))
+        self.assertEqual((rows["R2 NO 2"].fair, rows["R2 NO 2"].price), (0.99, 0.85))
+
+
 class Swap(unittest.TestCase):
-    """Five fast positions at a 3c usual gap; the candidate has 6.5c of fast part on a 0.90 price (7.2% return)."""
+    """Five fast positions at a 3c usual gap; the candidate has 6.5c of fast part on a 0.90 price (z 0.92)."""
     baselines = {str(m): base(-0.03) for m in range(1, 7)}
 
     def full_book(self, fairs):
@@ -214,14 +255,41 @@ class Swap(unittest.TestCase):
         holdings, lots = self.full_book([0.945, 0.985, 0.985, 0.985, 0.985])           # the first has 1.5c left (1.7% return)
         plan = run([opp("1", fair=0.995)], self.baselines, holdings, lots)
         self.assertEqual([w.opp.market_id for w in plan.wants], ["1"])
-        self.assertEqual([(v.market_id, r.startswith("swap")) for v, r in plan.exits], [("2", True)])
+        self.assertEqual([(e.view.market_id, e.kind) for e in plan.exits], [("2", "swap")])
         self.assertEqual([(o.action, o.book, o.market_id) for o in plan.sells], [("sell", "fast", "2")])
 
     def test_no_swap_when_the_gain_is_under_the_swap_margin(self):
-        holdings, lots = self.full_book([0.99] * 5)                                     # 6c left: 6.7% against the candidate's 7.2%
-        plan = run([opp("1", fair=0.995)], self.baselines, holdings, lots)
-        self.assertEqual((plan.wants, plan.exits), ([], []))
-        self.assertIn("book full", plan.rows[-1].note)
+        candidate = opp("1", fair=0.985)                                                  # z 0.45: reachable by a position sold at 0.90
+        cand_z = fast.part_z(candidate.fair, candidate.fair - candidate.price - 0.03)
+        for margin in (0.0, 0.1, 0.3, config.FAST_SWAP_Z):
+            with self.subTest(margin=margin), mock.patch.object(config, "FAST_SWAP_Z", margin):
+                for gap, swapped in ((-0.02, True), (0.02, False)):                       # the worst held lags the candidate by margin -/+ 0.02
+                    holdings, lots = self.full_book([fair_at_z(0.90, 0.03, cand_z - margin + gap)] * 5)
+                    plan = run([candidate], self.baselines, holdings, lots)
+                    self.assertEqual(bool(plan.exits), swapped, (margin, gap))
+                    if not plan.exits:
+                        self.assertIn("book full", plan.rows[-1].note)
+
+    def test_a_full_book_reads_the_candidates_book_so_a_swap_knows_the_shares_on_offer(self):
+        holdings, lots = self.full_book([0.945, 0.985, 0.985, 0.985, 0.985])
+        unread = run([opp("1", fair=0.995, size=None)], self.baselines, holdings, lots)     # bulk price only: no size at the ask yet
+        self.assertEqual(unread.wants, [])
+        self.assertEqual(unread.swap_markets[0], "1")                                      # read the candidate's book first
+        self.assertEqual(set(unread.swap_markets), {"1", "2", "3", "4", "5", "6"})
+        read = run([opp("1", fair=0.995)], self.baselines, holdings, lots)                 # after the depth read
+        self.assertEqual([w.opp.market_id for w in read.wants], ["1"])
+
+    def test_a_swap_weighs_z_not_cents(self):
+        cheap = held("2", 4_000, fair=fair_at_z(0.50, 0.03, 0.2), sell=0.50)           # a coinflip with 9c+ of fast part left, z 0.2
+        others = [held(str(i), 4_000, fair=0.995) for i in range(3, 7)]
+        lots = [fast_lot(h.market_id, h.shares) for h in [cheap] + others]
+        candidate = opp("1", fair=0.99, price=0.90)                                      # only 6c of fast part, but z 0.6
+        self.assertLess(candidate.fair - candidate.price - 0.03, cheap.fair - cheap.sell_price - 0.03)
+        cand_z = fast.part_z(0.99, 0.99 - 0.90 - 0.03)
+        for margin in (0.0, 0.1, config.FAST_SWAP_Z, 0.5):
+            with self.subTest(margin=margin), mock.patch.object(config, "FAST_SWAP_Z", margin):
+                plan = run([candidate], self.baselines, [cheap] + others, lots)
+                self.assertEqual([(e.view.market_id, e.kind) for e in plan.exits], [("2", "swap")] if cand_z - 0.2 >= margin else [])
 
     def test_a_free_slot_needs_no_swap(self):
         h = held("2", 4_000)
@@ -258,14 +326,14 @@ class MergedPlan(unittest.TestCase):
 
     def test_a_caught_up_fast_position_is_sold_and_its_market_is_read_for_depth(self):
         h = Holding("R1", "1", "no", "D", 10_000 / 0.91, 10_000, 0.91, 1e6, 0.96)         # 5c edge on a 5c usual gap
-        ledger = Ledger([Lot("fast", "1", "no", 10_000 / 0.91, 0.9, NOW - HOURS)])
+        ledger = Ledger([Lot("fast", "1", "no", 10_000 / 0.91, 0.9, NOW - FRESH_HOURS * HOURS)])
         plan = self.plan({"1": base(-0.05)}, [h], ledger)
         self.assertEqual([(o.action, o.book) for o in plan.sells], [("sell", "fast")])
         self.assertEqual(depth_targets(plan, 6)[0], "1")
 
     def test_one_exit_when_the_edge_is_negative_even_if_the_fast_book_holds_it(self):
         h = Holding("R1", "1", "no", "D", 10_000 / 0.99, 10_000, 0.99, 1e6, 0.95)         # fair 0.95 below the 0.99 sell price
-        ledger = Ledger([Lot("fast", "1", "no", 10_000 / 0.99, 0.9, NOW - HOURS)])
+        ledger = Ledger([Lot("fast", "1", "no", 10_000 / 0.99, 0.9, NOW - FRESH_HOURS * HOURS)])
         plan = self.plan({"1": base(-0.05)}, [h], ledger)
         self.assertEqual([(o.action, o.book) for o in plan.sells], [("sell", "hold")])
 

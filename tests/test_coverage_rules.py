@@ -5,7 +5,7 @@ from unittest import mock
 
 import config
 from portfolio import Portfolio
-from races import empty_quote, fill_missing_bid
+from races import drain_warnings, empty_quote, fill_missing_bid
 import kalshi
 from strategy import Fair, Opportunity, fair_value, find_opportunities, keep_top, probability_gaps, wins_when
 from trading import compute_wants
@@ -73,6 +73,30 @@ class SingleSourceRaces(unittest.TestCase):
         with mock.patch("kalshi.requests.get") as get:
             kalshi.fetch_prices(races)
         get.assert_not_called()
+
+    def kalshi_fetch(self, **response):
+        """Run kalshi.fetch_prices on a one-outcome race against this response; (the race's Kalshi quote, the warnings it raised)."""
+        races = race(["D"], {"D": (.5, .6)})
+        drain_warnings()
+        with mock.patch("kalshi.requests.get", **response):
+            kalshi.fetch_prices(races)
+        return races["X-RACE"]["outcomes"]["D"]["kalshi"], drain_warnings()
+
+    def test_kalshi_being_unavailable_leaves_no_quote_and_raises_no_warning(self):
+        listed = lambda **market: mock.Mock(json=lambda: {"markets": [{"ticker": "D", **market}]})
+        cases = {"the request fails": dict(side_effect=OSError("down")),
+                 "the ticker is no longer returned (settled)": dict(return_value=mock.Mock(json=lambda: {"markets": []})),
+                 "the market has no two-sided quote": dict(return_value=listed(yes_bid_dollars="0.0000", yes_ask_dollars="0.0000"))}
+        for why, response in cases.items():
+            with self.subTest(why):
+                quote, warnings = self.kalshi_fetch(**response)
+                self.assertIsNone(quote["bid"])
+                self.assertEqual(warnings, [])
+
+    def test_a_kalshi_market_that_is_quoted_still_fills_its_quote(self):
+        market = mock.Mock(json=lambda: {"markets": [{"ticker": "D", "yes_bid_dollars": "0.60", "yes_ask_dollars": "0.62"}]})
+        quote, warnings = self.kalshi_fetch(return_value=market)
+        self.assertEqual((quote["bid"], quote["ask"], warnings), (0.60, 0.62, []))
 
     def test_fair_value_works_from_polymarket_alone_and_from_kalshi_alone(self):
         quote = dict(empty_quote(), bid=0.60, ask=0.62, updated=1.0)

@@ -50,7 +50,7 @@ def opportunity_rows(candidates, baselines, min_edge):
         if b is None or b.signed is None:
             rows.append(logbook.opportunity_row(c))
         else:
-            rows.append(logbook.opportunity_row(c, bucket_of(c.fair)[0], b.for_side(c.side), gapmodel.fast_part(b, c.side, c.edge)))
+            rows.append(logbook.opportunity_row(c, bucket_of(c.fair)[0], b.usual(), gapmodel.fast_part(b, c.edge)))
     return rows
 
 
@@ -63,5 +63,5 @@ def refresh(races, fair_values, positions, state, now):
         state.gaps.save()
     refresh_volumes(races, state.volumes, now, config.VOLUME_REFRESH_PER_LOOP)
     market_ids = {c["market_id"] for _, c in iter_contracts(races)}
-    notes = state.ledger.reconcile([p for p in positions if p["market_id"] in market_ids], now)
+    notes = state.ledger.reconcile([p for p in positions if p["market_id"] in market_ids], now, state.patient.take_entry_buys())
     return state.gaps.baselines(market_ids, now), notes

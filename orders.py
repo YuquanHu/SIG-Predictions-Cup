@@ -1,4 +1,5 @@
 """Order placement. Dry run only: nothing here can reach SIG until the live stage is built."""
+import time
 from dataclasses import dataclass
 
 import budget
@@ -16,6 +17,12 @@ class Order:
     fair: float    # fair probability that `side` wins
     reason: str
     book: str = "hold"  # which book the order belongs to: "hold" or "fast"
+    rest_until: float | None = None  # a resting sell: left on the book across loops until this time (epoch seconds), not cancelled when the order timeout ends
+    rest_kind: str | None = None     # what a resting order is: "early" (early exit), "patient" (patient exit), "step" (a swap's step down the bids) or "entry" (a patient entry's bid)
+
+    @property
+    def resting(self):
+        return self.rest_until is not None
 
     @property
     def edge(self):
@@ -24,6 +31,11 @@ class Order:
     @property
     def value(self):
         return self.shares * self.price
+
+
+def rests_until(order):
+    """When a patient exit is given up, as local day and time."""
+    return time.strftime("%d %b %H:%M", time.localtime(order.rest_until))
 
 
 def _require_dry_run():
@@ -42,9 +54,9 @@ def place_order(order, timeout):
     """Limit order at `order.price`; anything unfilled after `timeout` seconds would be cancelled."""
     _require_dry_run()
     _count_write()
+    stay = f"rest on the book until {rests_until(order)}" if order.resting else f"cancel unfilled after {timeout}s"
     print(f"  [DRY RUN] would {order.action.upper()} {order.side.upper()} market {order.market_id} "
-          f"({order.race}) x{order.shares:,.0f} @ {order.price:.3f} limit, "
-          f"cancel unfilled after {timeout}s  | {order.reason}")
+          f"({order.race}) x{order.shares:,.0f} @ {order.price:.3f} limit, {stay}  | {order.reason}")
 
 
 def cancel_all():

@@ -68,26 +68,29 @@ class Classify(unittest.TestCase):
         b = classify(series(lambda i: 0.08 if i < 4 else 0.04), NOW)    # 4c steady, 8c for the last hour
         self.assertTrue(b.structural)
         self.assertAlmostEqual(b.size, 0.04)
-        self.assertAlmostEqual(fast_part(b, "yes", 0.08), 0.04)         # 4c structural, 4c fast
+        self.assertAlmostEqual(fast_part(b, 0.08), 0.04)         # 4c structural, 4c fast
 
 
 class FastPart(unittest.TestCase):
     def test_unclassified_means_no_fast_part(self):
-        self.assertIsNone(fast_part(classify([], NOW), "yes", 0.09))
+        self.assertIsNone(fast_part(classify([], NOW), 0.09))
 
     def test_the_usual_gap_is_taken_off_on_the_same_side(self):
         b = classify(series(lambda i: 0.05), NOW)
-        self.assertAlmostEqual(fast_part(b, "yes", 0.09), 0.04)
-        self.assertAlmostEqual(fast_part(b, "yes", 0.05), 0.0)
+        self.assertAlmostEqual(fast_part(b, 0.09), 0.04)
+        self.assertAlmostEqual(fast_part(b, 0.05), 0.0)
 
-    def test_a_usual_gap_pointing_the_other_way_gives_no_credit(self):
-        b = classify(series(lambda i: 0.05), NOW)                       # Yes usually cheap by 5c
-        self.assertAlmostEqual(fast_part(b, "no", 0.02), 0.02)          # a No edge of 2c is a 2c fast part, not 7c
+    def test_the_usual_gap_is_taken_off_by_its_size_whichever_way_it_points(self):
+        for gap in (0.05, -0.05):                                       # Yes usually cheap by 5c, or usually dear by 5c
+            b = classify(series(lambda i: gap), NOW)
+            self.assertAlmostEqual(b.usual(), 0.05)
+            self.assertAlmostEqual(fast_part(b, 0.08), 0.03)
+            self.assertAlmostEqual(fast_part(b, 0.02), -0.03)           # below the usual size: nothing new
 
     def test_a_usual_gap_inside_the_noise_tolerance_counts_as_none(self):
         b = classify(series(lambda i: 0.008), NOW)
-        self.assertEqual(b.for_side("yes"), 0.0)
-        self.assertAlmostEqual(fast_part(b, "yes", 0.06), 0.06)
+        self.assertEqual(b.usual(), 0.0)
+        self.assertAlmostEqual(fast_part(b, 0.06), 0.06)
 
 
 class Store(unittest.TestCase):

@@ -129,7 +129,7 @@ class SimulatedMarket(unittest.TestCase):
 
 class EndToEnd(unittest.TestCase):
     def test_the_fast_book_buys_the_lag_and_sells_when_sig_catches_up(self):
-        result = bt.run(race(), made_up_history(), "made up", end=bt.TRADE_START + 5 * DAY)
+        result = bt.run(race(), made_up_history(), "made up", {"FAST_MAX_HOURS": 24}, end=bt.TRADE_START + 5 * DAY)   # the time stop is after the 2h lag
         closed = [t for t in result.trades if t.exit_time]
         self.assertTrue(closed, "no fast trade closed")
         self.assertTrue(all(T1 <= t.entry_time < CATCH_UP + 3600 for t in closed))

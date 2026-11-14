@@ -19,6 +19,7 @@ class Volume:
     total: float       # SUSQies traded in the market, all time (as far back as SIG's daily candles go)
     recent: float      # SUSQies traded since the start of yesterday (UTC)
     fetched_at: float
+    week: float | None = None  # SUSQies traded over the last 7 UTC days; None: not read yet (a cache file from before this field)
 
 
 class VolumeStore:
@@ -34,9 +35,10 @@ class VolumeStore:
         self._volumes.update(volumes)
 
     def stale(self, market_ids, now):
-        """The markets with no volume or one older than VOLUME_TTL_HOURS, never-read first, then oldest first."""
+        """The markets with no volume, no week volume yet, or one older than VOLUME_TTL_HOURS: never-read first, then oldest first."""
         age_limit = now - config.VOLUME_TTL_HOURS * 3600
-        old = [(v.fetched_at if v else 0.0, m) for m in market_ids if (v := self.get(m)) is None or v.fetched_at < age_limit]
+        old = [(v.fetched_at if v else 0.0, m) for m in market_ids
+               if (v := self.get(m)) is None or v.week is None or v.fetched_at < age_limit]
         return [m for _, m in sorted(old)]
 
     def save(self, path=None):
@@ -51,7 +53,9 @@ class VolumeStore:
         if not os.path.exists(path):
             return cls()
         with open(path) as f:
-            return cls({m: Volume(**row) for m, row in json.load(f).items()})
+            rows = json.load(f)
+        # a week of 0 was how an old cache file said "unknown"; a market that really traded nothing is read once more at start-up
+        return cls({m: Volume(**{**row, "week": row.get("week") or None}) for m, row in rows.items()})
 
 
 def millions(x):

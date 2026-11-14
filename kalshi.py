@@ -4,7 +4,7 @@ import time
 import requests
 
 import config
-from races import clear_quote, fill_missing_bid, iter_outcomes, quote_available, warn
+from races import clear_quote, fill_missing_bid, iter_outcomes
 
 NAME = "Kalshi"
 
@@ -24,12 +24,14 @@ def setup(races):
 
 
 def fetch_prices(races):
-    """One batched request for every Kalshi ticker in the race table."""
-    outcomes = {}  # ticker -> (race_id, code, outcome)
-    for race_id, code, o in iter_outcomes(races):
+    """One batched request for every Kalshi ticker in the race table. Kalshi is optional (Polymarket is the fair value's source), so a failed
+    request, a ticker it no longer returns (a settled market) and a market with no two-sided quote leave that outcome without a Kalshi quote
+    and say nothing: the fair value's note shows it was dropped."""
+    outcomes = {}  # ticker -> outcome
+    for _, _, o in iter_outcomes(races):
         clear_quote(o["kalshi"])
-        if o["kalshi_id"]:  # outcomes with no Kalshi market are skipped without a warning
-            outcomes[o["kalshi_id"]] = (race_id, code, o)
+        if o["kalshi_id"]:  # outcomes with no Kalshi market are skipped
+            outcomes[o["kalshi_id"]] = o
     if not outcomes:
         return
     try:
@@ -40,16 +42,13 @@ def fetch_prices(races):
         )
         resp.raise_for_status()
         markets = {m["ticker"]: m for m in resp.json()["markets"]}
-    except Exception as e:
-        for race_id, code, o in outcomes.values():
-            warn(race_id, NAME, f"{code} ({o['kalshi_id']}): request failed: {e}")
+    except Exception:
         return
 
     now = time.time()
-    for ticker, (race_id, code, o) in outcomes.items():
+    for ticker, o in outcomes.items():
         m = markets.get(ticker)
         if m is None:
-            warn(race_id, NAME, f"{code} ({ticker}): ticker not returned")
             continue
         o["kalshi"].update(
             bid=_price(m.get("yes_bid_dollars")),
@@ -59,5 +58,3 @@ def fetch_prices(races):
             updated=now,
         )
         fill_missing_bid(o["kalshi"])
-        if not quote_available(o["kalshi"]):
-            warn(race_id, NAME, f"{code} ({ticker}): no two-sided quote")

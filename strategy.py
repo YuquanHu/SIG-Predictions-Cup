@@ -1,4 +1,5 @@
 """Stage 3 strategy: fair value, edge, Kelly, and picking the top trades. Pure logic, no network."""
+import math
 from dataclasses import dataclass, replace
 
 import config
@@ -13,6 +14,7 @@ class Fair:
     note: str
     sources: int = 0     # how many of Kalshi and Polymarket the value is built from
     raw: float | None = None  # the value before the race was scaled to add up to 1 (None: not scaled)
+    uncertainty: float = 0.0  # how far the value may be off (election guard, guard.uncertainty); 0 outside the election regime
 
 
 @dataclass
@@ -28,6 +30,7 @@ class Opportunity:
     wins_when: str     # outcome whose win makes this bet pay; equivalent bets share it
     sources: int = 2   # how many price sources the fair value rests on; one source gets a smaller race cap
     decision: str | None = None
+    uncertainty: float = 0.0  # of the fair value (Fair.uncertainty)
 
     @property
     def edge(self):
@@ -43,8 +46,24 @@ class Opportunity:
         return self.edge / self.price
 
     @property
+    def adj_edge(self):
+        """The edge less ELECTION_K x the fair value's uncertainty: what is left once the fair is trusted no further than it can be."""
+        return self.edge - config.ELECTION_K * self.uncertainty
+
+    @property
+    def z(self):
+        return z_score(self.fair, self.price, config.ELECTION_K * self.uncertainty)
+
+    @property
     def half_kelly(self):
         return self.kelly / 2
+
+
+def z_score(fair, price, haircut=0.0):
+    """Edge per unit of the bet's own risk: (fair - price - haircut) / sqrt(fair (1 - fair)). A share bought at `price` returns 1/price - 1 with
+    probability `fair` and -1 otherwise, so this is the ROI over the SD of the return (sqrt(fair (1 - fair)) / price): the per-bet
+    Sharpe, the same at any price. Unlike the ROI it does not favour a longshot whose small edge rides on a big chance of losing."""
+    return (fair - price - haircut) / math.sqrt(max(fair * (1 - fair), 1e-6))
 
 
 def fair_value(outcome, now):
@@ -119,7 +138,7 @@ def find_opportunities(races, fair_values):
                 if price is not None and 0 < price < 1:
                     found.append(Opportunity(race_id, contract["market_id"], contract["pays_if"], side,
                                              price, win_prob, size,
-                                             wins_when(race, contract["pays_if"], side), fv.sources))
+                                             wins_when(race, contract["pays_if"], side), fv.sources, uncertainty=fv.uncertainty))
     return found
 
 

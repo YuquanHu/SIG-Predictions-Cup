@@ -1,4 +1,5 @@
 """Offline tests for the volume cache and the liquidity rules. Run: python3 -m unittest discover -s tests -t ."""
+import json
 import os
 import tempfile
 import unittest
@@ -11,7 +12,7 @@ HOUR = 3600
 
 
 def vol(total=10e6, recent=50_000, age_hours=0.0):
-    return Volume(total, recent, NOW - age_hours * HOUR)
+    return Volume(total, recent, NOW - age_hours * HOUR, week=recent * 3)
 
 
 class Rules(unittest.TestCase):
@@ -58,6 +59,16 @@ class Store(unittest.TestCase):
             VolumeStore({"7": vol(2e6, 9_000)}).save(path)
             self.assertEqual(VolumeStore.load(path).get("7"), vol(2e6, 9_000))
             self.assertIsNone(VolumeStore.load(os.path.join(folder, "none.json")).get("7"))
+
+    def test_a_cache_from_before_the_week_volume_is_read_again(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "volumes.json")
+            with open(path, "w") as f:
+                json.dump({"old": {"total": 2e6, "recent": 9_000.0, "fetched_at": NOW, "week": 0.0},
+                           "new": {"total": 2e6, "recent": 9_000.0, "fetched_at": NOW, "week": 40_000.0}}, f)
+            store = VolumeStore.load(path)
+        self.assertIsNone(store.get("old").week)
+        self.assertEqual(store.stale(["old", "new"], NOW), ["old"])
 
     def test_an_update_replaces_only_the_markets_it_has(self):
         store = VolumeStore({"1": vol(1e6), "2": vol(2e6)})

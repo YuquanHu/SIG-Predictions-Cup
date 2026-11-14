@@ -66,7 +66,7 @@ def replay(prices, start, x):
         if open_trade:
             sign = 1 if open_trade["side"] == "yes" else -1
             exit_edge = sign * g + HALF_SPREAD                                       # fair minus a sale price
-            reason = ("caught up" if fast.caught_up(baseline, open_trade["side"], exit_edge) else   # the bot's own exit rules
+            reason = ("caught up" if fast.caught_up(baseline, exit_edge) else   # the bot's own exit rules
                       "time stop" if fast.time_up(open_trade["t"], t) else None)
             if reason:
                 moved = prices[t][1] - open_trade["sig"]                           # SIG yes price change since entry
@@ -75,9 +75,9 @@ def replay(prices, start, x):
             continue
         for side, sign in (("yes", 1), ("no", -1)):
             edge = sign * g - HALF_SPREAD                                           # executable edge now
-            part = gapmodel.fast_part(baseline, side, edge)
+            part = gapmodel.fast_part(baseline, edge)
             if part is not None and part >= x - gapmodel.EPS:
-                open_trade = {"t": t, "side": side, "edge": edge, "part": part, "usual": baseline.for_side(side),
+                open_trade = {"t": t, "side": side, "edge": edge, "part": part, "usual": baseline.usual(),
                               "structural": baseline.structural, "sig": prices[t][1]}
                 break
     return trades, open_trade

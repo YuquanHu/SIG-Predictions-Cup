@@ -11,7 +11,7 @@ EXTERNAL_SOURCES = ("kalshi", "poly")  # the sources fair value is built from
 
 
 def empty_quote():
-    return {"bid": None, "ask": None, "bid_size": None, "ask_size": None, "updated": None}
+    return {"bid": None, "ask": None, "bid_size": None, "ask_size": None, "bid_levels": None, "ask_levels": None, "updated": None}
 
 
 def clear_quote(q):

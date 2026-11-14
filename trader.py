@@ -1,16 +1,21 @@
 """Order execution. DryRunTrader only prints. LiveTrader sends real limit orders to SIG, cancels whatever has not
 filled once the order timeout is up, and reads what filled from the SIG positions.
 
-Both have the same four methods, so main.py does not care which one it has:
+Both have the same methods, so main.py does not care which one it has:
     cancel_open(loop_no)                    cancel orders left over from an earlier loop
-    execute(orders, timeout, positions_before, loop_no, max_order_value) -> Execution (problems and what filled)
-    has_open_orders()                       True while the bot may have resting orders
+    execute(orders, timeout, positions_before, loop_no, max_order_value) -> Execution (problems, what filled, what rests)
+    has_open_orders()                       True while the bot may have orders it will cancel next loop
     cancel_everything()                     account-wide cancel (kill switch and shutdown)
+Patient exits (orders with resting=True) are the exception: they are left on the book across loops, and
+    open_resting() -> {order id: shares left}, fill_of(order id), cancel_resting(order id)
+let the PatientBook follow them.
 """
 import time
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 
+import config
 import logbook
 import orders
 import sig
@@ -26,6 +31,7 @@ MAX_SHARES = 2_147_483_647                     # SIG's limit on one order's quan
 class Execution:
     problems: int  # orders rejected, never confirmed, or that could not be cancelled
     fills: list    # [(Order, shares filled)] for every order that filled at least one share; the ledger books them
+    rested: list = field(default_factory=list)  # [(Order, order id)] resting orders (patient exits and entries) now on the book
 
 
 class DryRunTrader:
@@ -33,22 +39,41 @@ class DryRunTrader:
 
     def __init__(self):
         self._placed = False
+        self.resting = {}   # pretend order id -> Order: patient exits that would be resting
+        self._next_id = -1
 
     def cancel_open(self, loop_no):
         orders.cancel_all()
 
     def execute(self, to_place, timeout, positions_before, loop_no, max_order_value):
+        rested = []
         for o in to_place:
             orders.place_order(o, timeout)
-            logbook.log("orders", loop_no, [logbook.order_event("would_place", o)])
-        self._placed = bool(to_place)
-        return Execution(0, [])
+            logbook.log("orders", loop_no, [logbook.order_event("would_place", o, detail="would rest on the book" if o.resting else "")])
+            if o.resting:
+                self.resting[self._next_id] = o
+                rested.append((o, self._next_id))
+                self._next_id -= 1
+        self._placed = any(not o.resting for o in to_place)
+        return Execution(0, [], rested)
+
+    def open_resting(self):
+        return {order_id: o.shares for order_id, o in self.resting.items()}
+
+    def fill_of(self, order_id):
+        return 0
+
+    def cancel_resting(self, order_id):
+        self.resting.pop(order_id, None)
+        return True
 
     def has_open_orders(self):
         return self._placed
 
     def cancel_everything(self):
+        self.resting.clear()
         orders.cancel_all()
+        return True
 
 
 @dataclass
@@ -86,7 +111,8 @@ class LiveTrader:
     def __init__(self, client, races):
         self.client = client
         self.races = races
-        self.open_ids = {}  # order id -> Order: the bot's orders that may still be resting
+        self.open_ids = {}  # order id -> Order: the bot's orders that may still be resting (cancelled next loop)
+        self.resting = {}   # order id -> Order: patient exits left on the book on purpose
 
     # ---- placing -------------------------------------------------------------------------------------------
 
@@ -110,6 +136,9 @@ class LiveTrader:
                                                    f"{max_order_value:,.0f}")
         body = {"idempotencyKey": str(uuid.uuid4()), "exchangeId": exchange_id, "side": o.side, "action": o.action,
                 "quantity": int(o.shares), "price": price}
+        if o.resting:  # SIG itself drops the order a little after the bot would, if the bot is no longer there to cancel it
+            expires = datetime.fromtimestamp(o.rest_until, timezone.utc) + timedelta(minutes=5)
+            body["expirationDate"] = expires.strftime("%Y-%m-%dT%H:%M:%S.000Z")
         for attempt in (1, 2):  # a retry reuses the idempotency key, so it can never place the order twice
             try:
                 status, data = self.client.request("POST", "/orders", body=body, expect=ANY_STATUS)
@@ -156,6 +185,7 @@ class LiveTrader:
                 status, data = None, {}
             if status == 200:
                 self.open_ids.clear()
+                self.resting.clear()
                 print(f"  cancelled all open orders ({data.get('cancelled')})")
                 logbook.log("orders", 0, [logbook.order_event("cancel_all", detail=f"cancelled {data.get('cancelled')}")])
                 return True
@@ -220,8 +250,10 @@ class LiveTrader:
         for p in placements:
             if p.status == "placed":
                 if p.open:  # one that filled at once is already closed and needs no cancel
-                    self.open_ids[p.order_id] = p.order
-                event, detail = "placed", f"{p.traded:,.0f} filled at once" if p.traded else ""
+                    (self.resting if p.order.resting else self.open_ids)[p.order_id] = p.order
+                event = "placed"
+                detail = "; ".join(x for x in (f"{p.traded:,.0f} filled at once" if p.traded else "",
+                                               f"rests on the book until {orders.rests_until(p.order)}" if p.order.resting and p.open else "") if x)
             else:
                 problems += 1
                 event, detail = p.status if p.status == "unconfirmed" else "rejected", p.detail
@@ -229,7 +261,8 @@ class LiveTrader:
                   f"x{p.order.shares:,.0f} @ {p.order.price:.3f}" + (f"  | {detail}" if detail else ""))
             logbook.log("orders", loop_no, [logbook.order_event(event, p.order, p.order_id or "", detail=detail)])
 
-        resting = [p for p in placements if p.status == "placed" and p.open]
+        rested = [p for p in placements if p.status == "placed" and p.open and p.order.resting]
+        resting = [p for p in placements if p.status == "placed" and p.open and not p.order.resting]
         if resting:
             print(f"  waiting {timeout}s for fills...")
             self._wait(timeout)
@@ -241,13 +274,14 @@ class LiveTrader:
         unconfirmed = [p for p in placements if p.status == "unconfirmed"]
         self._reconcile(unconfirmed, loop_no)
 
-        tracked = [p for p in placements if p.status in ("placed", "unconfirmed")]
+        tracked = [p for p in placements if p.status in ("placed", "unconfirmed") and p not in rested]  # a rested sell is followed by the PatientBook
         fills = []
         if tracked:
             fills, order_says = self._read_fills(tracked, signed_by_market(positions_before))
             for p, filled, says in zip(tracked, fills, order_says):
                 problems += self._log_outcome(p, filled, says, loop_no)
-        return Execution(problems, [(p.order, filled) for p, filled in zip(tracked, fills) if filled > 0])
+        return Execution(problems, [(p.order, filled) for p, filled in zip(tracked, fills) if filled > 0],
+                         [(p.order, p.order_id) for p in rested])
 
     def _log_outcome(self, p, filled, order_says, loop_no):
         o = p.order
@@ -276,3 +310,28 @@ class LiveTrader:
 
     def has_open_orders(self):
         return bool(self.open_ids)
+
+    # ---- patient exits ---------------------------------------------------------------------------------------------
+
+    def open_resting(self):
+        """{order id: shares not yet filled} for the resting orders SIG still has open (one read, none when nothing rests)."""
+        if not self.resting:
+            return {}
+        still_open = {o["id"]: o["quantity"] - (o.get("quantityFilled") or 0) for o in sig.fetch_open_orders() if o["id"] in self.resting}
+        self.resting = {order_id: o for order_id, o in self.resting.items() if order_id in still_open}  # a closed one is no longer ours to carry over
+        return still_open
+
+    def fill_of(self, order_id):
+        """Shares a (closed) resting order filled, or None when SIG does not say."""
+        try:
+            status, data = self.client.request("GET", f"/orders/{order_id}", expect=ANY_STATUS)
+        except st.TradeError:
+            return None
+        return data.get("quantityFilled") if status == 200 else None
+
+    def cancel_resting(self, order_id):
+        """Cancel one resting order. True when it is now closed (cancelled, or already filled)."""
+        ok = self._cancel(order_id)
+        if ok:
+            self.resting.pop(order_id, None)
+        return ok

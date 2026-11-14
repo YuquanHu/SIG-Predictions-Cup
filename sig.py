@@ -118,30 +118,40 @@ def _price_chunk(chunk, by_exchange, now):
         warn(race_id, NAME, f"market {c['market_id']}: exchange {exchange_id} not returned")
 
 
-def fetch_depth(races, market_ids):
-    """Best bid and ask with sizes for the given SIG markets, one orderbook read each (run side by side)."""
+def fetch_depth(races, market_ids, own=()):
+    """Best bid and ask with sizes for the given SIG markets, one orderbook read each (run side by side). `own`: [(Order, shares left)]
+    of the bot's own resting orders, which the book contains: they are taken out, so the bot never trades against itself."""
     wanted = set(market_ids)
-    run_all([lambda race_id=race_id, c=c: _read_depth(race_id, c)
+    run_all([lambda race_id=race_id, c=c: _read_depth(race_id, c, [(o, left) for o, left in own if o.market_id == c["market_id"]])
              for race_id, c in iter_contracts(races) if c["market_id"] in wanted])
 
 
-def _read_depth(race_id, c):
+def own_level(order):
+    """Where a resting order of the bot sits in the Yes book: ("bids" or "asks", Yes price). Selling a No at p is a Yes bid at 1 - p."""
+    yes_buy = (order.action == "buy") == (order.side == "yes")
+    return ("bids" if yes_buy else "asks"), round(order.price if order.side == "yes" else 1 - order.price, 3)
+
+
+def _read_depth(race_id, c, own):
     try:
-        book = _get(f"/markets/{c['market_id']}/orderbook", depth=1)
+        book = _get(f"/markets/{c['market_id']}/orderbook", depth=config.DEPTH_LEVELS)
         ex = next((e for e in book["exchanges"] if e["exchangeId"] == c["sig_exchange_id"]), None)
         if ex is None:
             raise SigError(f"exchange {c['sig_exchange_id']} not in orderbook")
     except Exception as e:  # keep the bulk quote, but without sizes nothing will trade here
         warn(race_id, NAME, f"market {c['market_id']} depth: {e}")
         return
-    best_bid = max(ex["bids"], key=lambda lvl: lvl["price"], default=None)
-    best_ask = min(ex["asks"], key=lambda lvl: lvl["price"], default=None)
+    levels = {side: {round(l["price"], 3): l["quantity"] for l in ex[side]} for side in ("bids", "asks")}
+    for order, left in own:
+        side, price = own_level(order)
+        if price in levels[side]:
+            levels[side][price] -= left
+    bids = sorted(((p, q) for p, q in levels["bids"].items() if q > 0), reverse=True)
+    asks = sorted((p, q) for p, q in levels["asks"].items() if q > 0)
     c["yes"].update(
-        bid=best_bid["price"] if best_bid else None,
-        bid_size=best_bid["quantity"] if best_bid else None,
-        ask=best_ask["price"] if best_ask else None,
-        ask_size=best_ask["quantity"] if best_ask else None,
-        updated=time.time(),
+        bid=bids[0][0] if bids else None, bid_size=bids[0][1] if bids else None,
+        ask=asks[0][0] if asks else None, ask_size=asks[0][1] if asks else None,
+        bid_levels=bids, ask_levels=asks, updated=time.time(),
     )
 
 
@@ -161,9 +171,9 @@ def _read_volume(race_id, c):
         warn(race_id, NAME, f"market {c['market_id']} volume: {e}")
         return c["market_id"], None
     now = time.time()
-    yesterday = now - now % 86400 - 86400
-    recent = sum(k["volume"] for k in candles if datetime.fromisoformat(k["time"]).timestamp() >= yesterday)
-    return c["market_id"], Volume(sum(k["volume"] for k in candles), recent, now)
+    today = now - now % 86400
+    since = lambda start: sum(k["volume"] for k in candles if datetime.fromisoformat(k["time"]).timestamp() >= start)
+    return c["market_id"], Volume(sum(k["volume"] for k in candles), since(today - 86400), now, since(today - 6 * 86400))
 
 
 def fetch_open_orders(exchange_id=None):

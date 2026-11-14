@@ -163,12 +163,21 @@ Is a market structural? (decided by the median)
   structural = M >= 3 cents
                and 10th percentile of the 48h gap >= hurdle
                and median(gap over the last 2h) >= hurdle
-  fast part  = executable edge now - M      (never below zero credit: a usual gap pointing the other way counts as 0)
+  fast part  = executable edge now - M      (M by its size, whichever way the usual gap points; 2026-10-28)
 - A market needs at least 96 of its 192 samples, otherwise it is unclassified and gets no fast entry (a structural gap would otherwise look like a fresh fast move).
 - A market can be both: a market that sits at 4 cents of edge and spikes to 8 on news has 4 cents structural and 4 cents fast.
 
 Structural hold book
 - Five buckets by the fair probability of the side being bought. One position per bucket, chosen by expected value per dollar (ROI = edge / price). No Kelly.
+  (2026-11-03) Chosen by z = edge / sqrt(p (1 - p)) instead: the ROI over the SD of the bet's return (the per-bet Sharpe), the same at any price.
+  ROI favoured longshots (SENATE-CONTROL 153 No at 0.195 was a pick with a 38.5% ROI and z 0.17).
+  (2026-11-03) Up to `HOLD_SLOTS` positions per bucket (sure bet 3, favourite 5, coinflip 4, unlikely 6, longshot 6), each an equal
+  slot of the bucket's share; an empty slot stays cash. The counts give every bucket about the same dollar risk: slots ~ (the bucket's
+  SD with one bet / the sure bet's)^2. Held bets (hand buys too, once adopted; any contract of the same bet) take their slots first,
+  best z at the sell price first, and are topped up only when they qualify; the ones over the slots are never topped up. Loop 1 of a run
+  is built from the held bets alone; from loop 2 a new bet fills a free slot, or replaces the weakest held bet (those over the slots first)
+  when it has `HOLD_SWAP_Z` (0.25) more z, and that bet's hold lots are sold at the bid. Frozen bets, dust sales and a market bought a
+  moment ago are not swapped.
 
   Bucket       Chance       Share of hold book    Share of total equity
   Longshot     under 20%    2%                    0.6%
@@ -177,22 +186,46 @@ Structural hold book
   Favourite    60 to 90%    33%                   9.9%
   Sure bet     90% and up   40%                   12%
 
+- Minimum ROI per bucket (`HOLD_MIN_ROI`, added 2026-10-31): sure bet 6%, favourite 10%, coinflip 15%, unlikely 20%, longshot 25%. A candidate below its bucket's floor is never picked, so the bucket stays cash.
+  (2026-11-03) Replaced by one minimum z, `HOLD_MIN_Z` = 0.25, in every bucket: the minimum ROI is then `Z sqrt(p(1-p)) / (p - Z sqrt(p(1-p)))`
+  (`hold.roi_floor`): 6% at p 0.95, 17% at 0.75, 33% at 0.5, 62% at 0.3, 300% at 0.1.
+  (2026-11-03, later) Raised to `HOLD_MIN_Z` 0.30 and `HOLD_MIN_EDGE` 5c (was 3c; it binds only above p ~0.95): 5.3% at p 0.99, 7% at 0.95, 21% at 0.75, 43% at 0.5, 85% at 0.3. The old table asked for less edge per unit of risk
+  the riskier the bucket (z 0.25 -> 0.07 at the midpoints).
+  (2026-11-03, latest) `HOLD_MIN_Z` back to 0.25, `HOLD_MIN_EDGE` stays 5c: 5.3% at p 0.99, 6.1% at 0.95, 9.1% at 0.90, 16.9% at 0.75, 33.3% at 0.5, 61.8% at 0.3.
 - Risk must pay: a riskier bucket only picks a candidate whose ROI is above the best pick of every more certain bucket (taking more risk for the same or less return is pointless). Otherwise the bucket stays in cash.
-- Entry: the market is structural, the executable edge (fair minus the ask, or bid minus fair for No) is at least 3 cents, and the book has enough shares on offer.
+- Entry: the market is structural (or, since 2026-11-01, has an executable edge of `HOLD_BIG_EDGE`, 10 cents: held to resolution the whole edge is earned, so a gap that only just opened still counts; it needs a classified gap and the side the usual gap favours), the executable edge (fair minus the ask, or bid minus fair for No) is at least `HOLD_MIN_EDGE` (5 cents since 2026-11-03, 3 before), and the book has enough shares on offer.
   A race with three or more outcomes (an independent candidate) needs "rules_checked": true in races.json first, because SIG's wording for the party contract
   may or may not count an independent (the Montana Senate case).
 - Size: the bucket's share minus what is already held, limited by the 2%-of-equity single order and the 25% single position cap.
 - Staying power: the held pick is replaced only when a challenger beats its ROI by 3% (config), bucket edges have a 2% band, and the cooldown applies, so ranking noise does not cause churn.
+  (2026-11-03) By 0.10 more z (`HOLD_SWITCH_Z`).
 - Exit: only when the edge turns negative (fair value falls below the sell price). The invest cap never forces a sale.
+- Top-up freeze (2026-11-01, both books): a bet held `TOPUP_FREEZE_DROP` (10c) or more below its average entry, at its sell price, is not bought by
+  either book until `TOPUP_FREEZE_HOURS` (6) after the last loop it was that far down. Nothing is sold: if fair fell with SIG the position keeps its
+  edge, and selling would only lock the loss in. What it stops is averaging down when SIG falls and fair does not, which can be a stale fair value.
+  The hold pick stays the pick (want 0), so the bucket does not fill with another market meanwhile. Kept in `.ledger.json` (`frozen`).
 - Positions held before v2 are grandfathered: kept as hold positions, not topped up, not sold just to fit one-per-bucket.
 - A bucket with no structural candidate stays in cash (open decision below).
 
 Fast opportunity book
 - Enter when fast part >= x cents (config FAST_MIN_EDGE, 3c in config now; 5 cents was planned, see open decisions) and the SIG spread is at most 3c (FAST_MAX_SPREAD) and fast part minus the spread is still above the 1c catch-up line. Rank by fast part / price.
+  (2026-11-03) Rank by the fast part itself, in cents, and swap only for `FAST_SWAP_Z` (0.25) more z of the fast part (fast part /
+  sqrt(p (1 - p)), the hold book's z: a swap's cost is cents, but fair-value noise is worth fewer z on a longshot than on a near-certain bet): the noise of a fair value
+  is about the same in cents at any price, so 4c on a 0.20 longshot ranked first by ROI was mostly noise.
 - At most 5 positions, each at most 20% of the fast book (a fixed slice, 6% of equity), still limited by the 2% single order, the 25% position cap, the 30% race cap and the shares on offer. Never the other side of a market the bot already holds. No `rules_checked` gate (that is hold only).
 - Unwind when SIG has caught up to the structural gap, not to fair value: when (fair - sell price) - M falls to 1 cent or less.
 - Also unwind after 24 hours, or early when the book is full and a better fast candidate beats the worst held one by 1% (the swap floor, the check that the replacement buy
   can happen, and the cooldown all apply).
+- (2026-11-02) Election window: SIG marked favourites down while Kalshi/Polymarket stayed put, an edge earned at resolution. Until
+  `FAST_HOLD_UNTIL` (5 Nov 12:00) the fast book sells only on a negative edge or a swap (no time stop, caught-up, patient or early exit;
+  resting ones are cancelled), the usual gap is frozen at `BASELINE_FROZEN_AT` (2 Nov 00:00, before the shift), and `SWAP_MARGIN` is 3%.
+- (2026-10-29) A position resting for a patient exit keeps its slot and can be swapped out; with patient exits on, a swap cancels that exit and sells by
+  steps: a limit at the best bid resting 5 minutes (SWAP_STEP_MINUTES), then the next bid level down for what is left, until sold.
+  (2026-11-02) Each loop the steps go on only while the best fast entry of another bet has FAST_SWAP_Z more z (of the fast part, since 2026-11-03) than the
+  position still does at the step's price; a step down raises what it earns, so the sale can end itself. Then the resting step is cancelled
+  and the position is kept, slot included.
+- (2026-10-29) Early exits (EARLY_EXITS, off by default): from entry all fast shares are listed at the structural value (fair - usual gap) for 24h,
+  re-listed when it moves more than 1c or after a top-up, held back while the fast part left is still the entry edge or more (the bot buys or sells a position, never both); then a patient exit until the time stop (+60 min), then the bid. One resting sell per position.
 
 Shared safeguards
 - 2% of total equity per order, 25% per position, 30% per race, 60% invested, kill switch (10% daily loss or 5 errors in a row), STOP file, 5-minute cooldown against flip-flopping.
@@ -230,6 +263,7 @@ Stage 4 findings (2026-10-24)
 - v2 start-up check shows the books, hold and fast entry rules instead of the v1 minimum edge. The v2 report shows ROI instead of Kelly and a hold / fast share split per holding. `opportunities.csv` has a new `fast_part` column (use it to calibrate x).
 - Fast liquidity check (2026-10-25, `liquidity.py`): a fast entry needs known traded volume, at least 5,000 SUSQies since yesterday (UTC) and 1M all time; 1M to 5M gets half a slice, 5M+ a full one. Volumes come from SIG's daily candles, cached in `.volume_cache.json` (12h). See updates.md.
 - Backtest (2026-10-26): `analysis/backtest_data.py` (cache), `analysis/backtest_v2.py` (replays `make_plan_v2` from Oct 1 on 5-minute steps, `--grid` / `--robust`), `backtest_metrics.py`, `backtest_plots.py`. Results and caveats in updates.md.
+- Patient exits (2026-10-27, off by default): `config.PATIENT_EXITS`; `bigorder.py` (big-order size, rest price, exit fill), `patient.py` (PatientBook), resting orders in `trader.py`; swap pricing walks the bids within 1c. See updates.md.
 - The slow regime now pauses 30s. Reads per loop are unchanged (about 11 at most); writes are only spent on orders.
 
 Live checklist for v2 (you run it; I never run main.py live)
@@ -240,7 +274,7 @@ Live checklist for v2 (you run it; I never run main.py live)
   5. Decide x (config FAST_MIN_EDGE) and which independent-candidate races to mark "rules_checked".
   6. Only then set DRY_RUN = False yourself and start with the slow regime and a quiet market. Type LIVE at the check.
   7. Watch the first fills: the ledger (.ledger.json) should gain a "fast" or "hold" lot for each fill, and the next loop should show no "adopted" note. The unwind, time stop and swap have only run in unit tests, so watch the first fast position until it closes.
-  8. Keep the STOP file command ready (touch STOP). Ctrl+C and the kill switch cancel every open order on the account.
+  8. Keep the STOP file command ready (touch STOP). The kill switch (STOP file, daily loss, 5 errors in a row) cancels every open order on the account; Ctrl+C leaves the resting orders on SIG and the next start follows them again (.resting.json).
 
 Open decisions
 1. x: config is at 3 cents now (5 was planned); the replay supports 3 and shows nothing at 4 or 5 on the one real event. Calibrate on more events before going live.
@@ -252,3 +286,12 @@ The back-filled history is scaled the same way at every sample time, and lives i
 
 Where the code and numbers live: config.py (BUCKETS, REGIMES, FAST_MIN_EDGE, STRUCTURAL_MIN_GAP, NOISE_TOLERANCE, HISTORY_HOURS), settings.json, gapmodel.py,
 backfill.py, structural_report.py, analysis/replay_fast.py, and updates.md for the dated log of what was found and why.
+
+## Election-night guard (2026-11-03)
+`guard.FairGuard.apply` runs after `compute_fair_values` only when `REGIME` is `election` (main.run_loop). Per race: `pause.json` (no fair value),
+`calls.json` (the called outcome at 0.99 if a source has it at 0.90+; full size; skips the rest), freshness (Polymarket fetched within 15s, else the race is
+skipped; Kalshi is optional, 2026-11-04: without it the race trades on Polymarket), the breaker (a fair move over 15c in 60s backed only by Kalshi pauses it 3 min; with two
+sources the 4c agreement rule already voids a one-source spike, and Polymarket alone is trusted), and persistence (a changed fair is used after 2 loops within 3c). Each fair
+carries an uncertainty s = max(1c, source disagreement, half the widest source spread, 0.5 x its 60s move); `Opportunity.z` and the fast
+gate use `edge - ELECTION_K x s`. Buys in races not called get `ELECTION_UNCALLED_SIZE` (0.5) of the order cap. Exits and the 4s election order
+timeout are unchanged.

@@ -7,7 +7,8 @@ shows beyond that usual gap is the fast part:
     M          = |median(gap_48h)|, on the side the gap favours
     hurdle     = min(0.8 * M, M - 0.01)
     structural = M >= 3c and p10(gap_48h) >= hurdle and median(gap_last_2h) >= hurdle
-    fast part  = executable edge now - usual gap on that side (never below 0: no credit for a gap pointing the other way)
+    fast part  = executable edge now - |usual gap| (a market that is usually off fair value in either direction is mispriced either way,
+                 so a swing back from a gap that points the other way is no fast part either)
 """
 import csv
 import os
@@ -50,13 +51,11 @@ class Baseline:
     p10: float | None = None     # 10th percentile of the gap on that side over the window
     recent: float | None = None  # median gap on that side over the last RECENT_HOURS
 
-    def for_side(self, side):
-        """The usual gap on `side`'s own terms, or None when unclassified. A gap inside the noise tolerance is no gap."""
+    def usual(self):
+        """The usual gap by its size, whichever way it points, or None when unclassified. A gap inside the noise tolerance is no gap."""
         if self.signed is None:
             return None
-        if abs(self.signed) < config.NOISE_TOLERANCE - EPS:
-            return 0.0
-        return self.signed if side == "yes" else -self.signed
+        return 0.0 if self.size < config.NOISE_TOLERANCE - EPS else self.size
 
 
 UNCLASSIFIED = Baseline(None, None, 0.0, 0.0, False, 0)
@@ -79,11 +78,12 @@ def classify(samples, now):
     return Baseline(signed, "yes" if sign > 0 else "no", size, hurdle, structural, len(window), p10, recent_median)
 
 
-def fast_part(baseline, side, edge):
-    """The part of an executable edge on `side` beyond the usual gap on that side. None when unclassified (no fast entry).
-    A usual gap that points the other way is no credit: it counts as 0, so a swing back from it is not a fast part."""
-    usual = baseline.for_side(side)
-    return None if usual is None else edge - max(usual, 0.0)
+def fast_part(baseline, edge):
+    """The part of an executable edge beyond the usual gap on that side. None when unclassified (no fast entry).
+    The usual gap counts by its size whichever way it points: a market that is usually 1c off fair value is mispriced either way, so a
+    swing back from it is not a fast part."""
+    usual = baseline.usual()
+    return None if usual is None else edge - usual
 
 
 def current_gaps(races, fair_values):
@@ -114,8 +114,15 @@ class GapStore:
     def samples(self, market_id):
         return sorted(self._samples[market_id].items())
 
+    def as_of(self, now):
+        """The time the baselines are taken at: `now`, or BASELINE_FROZEN_AT once that has passed."""
+        frozen = config.BASELINE_FROZEN_AT
+        return now if frozen is None else min(now, frozen)
+
     def count(self, market_id, now):
-        return sum(1 for t in self._samples[market_id] if now - t <= config.HISTORY_HOURS * 3600)
+        """Samples in the window of the baselines (the HISTORY_HOURS up to as_of)."""
+        at = self.as_of(now)
+        return sum(1 for t in self._samples[market_id] if 0 <= at - t <= config.HISTORY_HOURS * 3600)
 
     def latest(self, market_id):
         """Time of the newest sample of one market, or None."""
@@ -125,12 +132,16 @@ class GapStore:
         return max((max(s) for s in self._samples.values() if s), default=None)
 
     def prune(self, now):
+        """Forget the samples older than the window of the baselines (as_of), so a frozen window is kept."""
+        start = self.as_of(now) - config.HISTORY_HOURS * 3600
         for market_id, samples in self._samples.items():
-            for t in [t for t in samples if now - t > config.HISTORY_HOURS * 3600]:
+            for t in [t for t in samples if t < start]:
                 del samples[t]
 
     def baselines(self, market_ids, now):
-        return {m: classify(self.samples(m), now) for m in market_ids}
+        """{market_id: Baseline} from the samples up to as_of(now); the samples after a freeze are kept but not used."""
+        at = self.as_of(now)
+        return {m: classify([(t, g) for t, g in self.samples(m) if t <= at], at) for m in market_ids}
 
     def save(self, path=None):
         path = path or config.GAP_HISTORY_FILE

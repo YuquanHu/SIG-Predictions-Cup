@@ -8,7 +8,9 @@ import config
 from books import Ledger
 from cooldown import Cooldown
 from gapmodel import GapStore
+from guard import FairGuard
 from liquidity import VolumeStore
+from patient import PatientBook
 
 
 @dataclass
@@ -21,6 +23,8 @@ class RunState:
     cooldown: Cooldown = field(default_factory=lambda: Cooldown(config.COOLDOWN_SECONDS))
     gaps: GapStore = field(default_factory=GapStore)  # two-book strategy: the gap history
     ledger: Ledger = field(default_factory=Ledger)    # two-book strategy: which book owns which shares
+    patient: PatientBook = field(default_factory=PatientBook)  # two-book strategy: the fast sells resting on SIG between loops
+    guard: FairGuard = field(default_factory=FairGuard)  # the election-night guard on the fair values (REGIME election only)
     volumes: VolumeStore = field(default_factory=VolumeStore)  # two-book strategy: traded volume per market (fast book liquidity)
 
 

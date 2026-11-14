@@ -72,7 +72,7 @@ def main():
         if kind == "no mispricing" and not args.all:
             continue
         o = edge.get((market_id, b.side))
-        part = gapmodel.fast_part(b, b.side, o.edge) if o else None
+        part = gapmodel.fast_part(b, o.edge) if o else None
         fast = "-" if part is None else f"{part * 100:+.1f}c" + ("  FAST" if part >= config.FAST_MIN_EDGE - EPS else "")
         rows.append((b.size, (race_id, market_id, b.side.upper(), f"{b.size * 100:.1f}c", f"{b.p10 * 100:.1f}c",
                               f"{b.recent * 100:.1f}c" if b.recent is not None else "-", f"{b.hurdle * 100:.1f}c", b.samples,
