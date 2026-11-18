@@ -105,6 +105,3 @@ echo "SIG_API_KEY=your_key" > .env
 python3 main.py --strategy v2 --once      # dry run, one loop
 Before you publish, check these. I haven't put them in the draft.
 
-What SIG is: I don't know how you want to describe the competition, so write that line yourself.
-Your results: I haven't included any, so add them if you want. The log shows a first live run that lost money to churn on 24 Oct. The numbers above are the current settings, not a record of what worked.
-settings.json: your current limits are 50% invested, 25% per book and a 50% daily loss. I left the values out of the README so it doesn't go stale.
