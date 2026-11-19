@@ -2,7 +2,7 @@
 
 A Python bot that trades US 2026 election markets (Senate, House, Governor and chamber control) on SIG's prediction exchange. It compares SIG's prices with the prices on Kalshi and Polymarket and buys where SIG looks wrong. Prices are in SUSQies.
 
-> **Disclaimer:** Not financial advice. With `DRY_RUN = False` the bot sends real orders. Run it dry first.
+> **Disclaimer:** Not financial advice, won't work on real markets and the competition is over. With `DRY_RUN = False` the bot sends real orders. Run it dry first.
 
 ## How it works
 
