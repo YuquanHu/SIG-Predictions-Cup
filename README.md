@@ -124,7 +124,7 @@ SIG Predictions Cup, Midterm Elections tournament. Starting balance 100,000 SUSQ
 |---|---|
 | Final account value | **124,713 SUSQies (+24.7%)** |
 | Sharpe ratio, daily (SIG's figure) | **5.70** |
-| Sharpe ratio, hourly: as reported → adjusted | 7.20 → **8.22** |
+| Sharpe ratio, hourly (Oct 20 to Nov 4): as reported → adjusted | 5.63 → **6.68** |
 | Max drawdown, hourly: as reported → adjusted | −13.1% → **−5.5%** |
 
 **The adjustment.** From 08:00 to 11:00 UTC on Nov 4, SIG valued my MN-01 position (about 32,000 shares on the Democrat) at 0.32–0.62 a share, while the Democrat traded at 0.85–0.89 on SIG, Kalshi and Polymarket. The adjusted figures re-mark only those hours, at the Kalshi/Polymarket average; every other hour is SIG's own value. SIG's daily Sharpe uses 00:00 UTC values (annualised by √252), so the mis-mark never entered it. The hourly figures are annualised by √(24 × 365), so they aren't comparable with the daily one.
